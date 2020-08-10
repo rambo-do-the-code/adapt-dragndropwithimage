@@ -14,7 +14,5 @@ Accessibility is not possible with Drag and Drop components as the viewer may no
 <p><strong>DOES NOT WORK WITH FRAMEWORK VERSION 5</strong>. Please go to the Framework 5 version of this component on my other github site...</p>
 [github.com/zarek3333/adapt-dragndropwithimage](https://github.com/zarek3333/adapt-dragndropwithimage)
 
-##Browser spec
 
-If you have detailed browser spec you should detail them here.
 
