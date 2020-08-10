@@ -11,6 +11,10 @@ A drag and drop with images component, both the drag and drop spots can have ima
 
 Accessibility is not possible with Drag and Drop components as the viewer may not be able to see to drag items to know where to drop them. Please do not use this component if you wish to use accessibility.
 
+<p><strong>DOES NOT WORK WITH FRAMEWORK VERSION 5</strong>. Please go to the Framework 5 version of this component on my other github site...</p>
+[github.com/zarek3333/adapt-dragndropwithimage](https://github.com/zarek3333/adapt-dragndropwithimage)
+
 ##Browser spec
 
 If you have detailed browser spec you should detail them here.
+
