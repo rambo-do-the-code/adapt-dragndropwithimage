@@ -1,6 +1,6 @@
-<div class="dragndropwi-inner component-inner">
+<div class="dragndropwi__inner component__inner">
     {{> component this}}
-    <div class="dragndropwi-widget component-widget {{#unless _isEnabled}} disabled {{#if _isComplete}} complete submitted user {{#if _isCorrect}}correct{{/if}} {{/if}} {{/unless}}">
+    <div class="dragndropwi__widget component__widget {{#unless _isEnabled}} disabled {{#if _isComplete}} is-complete is-submitted show-user-answer {{#if _isCorrect}}is-correct{{/if}} {{/if}} {{/unless}}">
 
         <div class="dragndropwi-container">
 
@@ -37,30 +37,30 @@
         </div>
         {{#each _items}}
             {{#each accepted}}
-                <style>.dragndropwithimage-component[data-adapt-id="{{../../_id}}"] .dragndropwi-item[name*='{{src}}']:after{content:'{{description}}';} *::-ms-backdrop, .dragndropwithimage-component[data-adapt-id="{{../../_id}}"] .dragndropwi-item[style*='background-image: url("{{src}}")']:after{content:'{{description}}';}</style>
+                <style>.dragndropwithimage[data-adapt-id="{{../../_id}}"] .dragndropwi-item[name*='{{src}}']:after{content:'{{description}}';} *::-ms-backdrop, .dragndropwithimage[data-adapt-id="{{../../_id}}"] .dragndropwi-item[style*='background-image: url("{{src}}")']:after{content:'{{description}}';}</style>
             {{/each}}
         {{/each}}
         {{#each dummyAnswers}}
-                <style>.dragndropwithimage-component[data-adapt-id="{{../_id}}"] .dragndropwi-item[name*='{{src}}']:after{content:'{{description}}';} *::-ms-backdrop, .dragndropwithimage-component[data-adapt-id="{{../_id}}"] .dragndropwi-item[style*='background-image: url("{{src}}")']:after{content:'{{description}}';}</style>
+                <style>.dragndropwithimage[data-adapt-id="{{../_id}}"] .dragndropwi-item[name*='{{src}}']:after{content:'{{description}}';} *::-ms-backdrop, .dragndropwithimage[data-adapt-id="{{../_id}}"] .dragndropwi-item[style*='background-image: url("{{src}}")']:after{content:'{{description}}';}</style>
         {{/each}}
         {{#if _minHeight}}
-            <style>.dragndropwithimage-component[data-adapt-id="{{_id}}"] .dragndropwi-inner .dragndropwi-answers .dragndropwi-answer{min-height:{{_minHeight}}px !important;}</style>
+            <style>.dragndropwithimage[data-adapt-id="{{_id}}"] .dragndropwi__inner .dragndropwi-answers .dragndropwi-answer{min-height:{{_minHeight}}px !important;}</style>
         {{/if}}
         {{#if _outofSpace}}
-            <style>.dragndropwithimage-component[data-adapt-id="{{_id}}"] .nomorespace:before{content: "{{_outofSpace}}";}</style>
+            <style>.dragndropwithimage[data-adapt-id="{{_id}}"] .nomorespace:before{content: "{{_outofSpace}}";}</style>
         {{/if}}
         <style>
-            .dragndropwithimage-component[data-adapt-id="{{_id}}"] .dragndropwi-inner .submitted.complete.show-correct-answer .dragndropwi-answers .dragndropwi-answer:not([style*="top: 0px"]), .dragndropwithimage-component[data-adapt-id="{{_id}}"] .dragndropwi-inner .submitted.complete.show-user-answer .dragndropwi-answers .dragndropwi-answer:not([style*="top: 0px"]) {
+            .dragndropwithimage[data-adapt-id="{{_id}}"] .dragndropwi__inner .is-submitted.is-complete.show-correct-answer .dragndropwi-answers .dragndropwi-answer:not([style*="top: 0px"]), .dragndropwithimage[data-adapt-id="{{_id}}"] .dragndropwi__inner .submitted.complete.show-user-answer .dragndropwi-answers .dragndropwi-answer:not([style*="top: 0px"]) {
                 -webkit-transition: opacity 1s ease-in-out;
                 -moz-transition: opacity 1s ease-in-out;
                 -ms-transition: opacity 1s ease-in-out;
                 -o-transition: opacity 1s ease-in-out;
                 opacity: 0;
             }
-            .dragndropwithimage-component[data-adapt-id="{{_id}}"] .dragndropwi-inner .submitted.complete.show-correct-answer .dragndropwi-answers .dragndropwi-answer:not(.dragcharm) {
+            .dragndropwithimage[data-adapt-id="{{_id}}"] .dragndropwi__inner .is-submitted.is-complete.show-correct-answer .dragndropwi-answers .dragndropwi-answer:not(.dragcharm) {
                 opacity: 0;
             }
-            .dragndropwithimage-component[data-adapt-id="{{_id}}"] .dragndropwi-inner .submitted.complete.show-correct-answer .dragndropwi-answers .dragndropwi-answer.dragcharm {
+            .dragndropwithimage[data-adapt-id="{{_id}}"] .dragndropwi__inner .is-submitted.is-complete.show-correct-answer .dragndropwi-answers .dragndropwi-answer.dragcharm {
                 display: flex !important;
                 opacity: 1 !important;
                 z-index: 25 !important;
@@ -75,12 +75,12 @@
                 font-weight: bold;
                 align-items: baseline;
             }
-            .dragndropwithimage-component[data-adapt-id="{{_id}}"] .dragndropwi-inner .submitted.complete.show-correct-answer .dragndropwi-answers .dragndropwi-answer.dragcharm:after {
-                content: "\e633";
+            .dragndropwithimage[data-adapt-id="{{_id}}"] .dragndropwi__inner .is-submitted.is-complete.show-correct-answer .dragndropwi-answers .dragndropwi-answer.dragcharm:after {
+                content: "\e944";
                 color: white;
                 background-color: black;
-                border-radius: 40px;
-                padding: 5px;
+                border-radius: 36px;
+                padding: 4px;
                 border: 2px solid white;
                 font-size: 24px;
                 text-decoration: none;
@@ -95,9 +95,9 @@
                 -webkit-font-smoothing: antialiased;
                 -moz-osx-font-smoothing: grayscale;
                 text-shadow: none !important;
-                width: 24px;
+                width: 36px;
             }
-            .dragndropwithimage-component[data-adapt-id="{{_id}}"] .dragndropwi-inner .submitted.complete.show-correct-answer .dragndropwi-answers .dragndropwi-answer.dragcharm:before {
+            .dragndropwithimage[data-adapt-id="{{_id}}"] .dragndropwi__inner .is-submitted.is-complete.show-correct-answer .dragndropwi-answers .dragndropwi-answer.dragcharm:before {
                 display: flex;
                 justify-content: center;
                 align-items: flex-start;
@@ -113,6 +113,5 @@
             }
         </style>
     </div>
-    <div class="buttons {{#if _bounceBack}}bounceback{{/if}}" >
-    </div>
+    <div class="btn__container {{#if _bounceBack}}bounceback{{/if}}" ></div>
 </div>

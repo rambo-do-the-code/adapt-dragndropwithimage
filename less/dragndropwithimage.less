@@ -1,4 +1,4 @@
-.dragndropwi-inner {
+.dragndropwi__inner {
 
     position: relative;
 
@@ -18,15 +18,15 @@
         transition: opacity 200ms;
     }
 
-    .dragndropwi-widget.dragging .dragndropwi-overlay {
+    .dragndropwi__widget.dragging .dragndropwi-overlay {
         z-index: 10;
         opacity: 0.5;
     }
 
-    .buttons, .dragndropwi-item {
+    .btn__container, .dragndropwi-item {
         z-index: 11;
     }
-    .buttons.bounceback {
+    .btn__container.bounceback {
         display: none !important;
     }
 
@@ -52,7 +52,7 @@
         max-width: 188px;
         
         .dragndropwi-question-text {
-            font-size: @body-text-font-size;
+            font-size: @body-size;
             margin-bottom: 10px;
             margin-top: 10px;
             color: @black;
@@ -170,7 +170,7 @@
                 font-size: 13px;
                 max-width: 188px;
                 text-overflow: ellipsis;
-                @white-space: nowrap;
+                white-space: nowrap;
                 overflow: hidden;
                 white-space: nowrap;
             }
@@ -194,15 +194,15 @@
     }
 }
 
-.dragndropwi-widget.show-user-answer {
+.dragndropwi__widget.show-user-answer {
     .dragndropwi-question {
         &.correct .icon-tick {
             display: block;
-            color: @green;
+            color: @validation-success;
         }
         &.incorrect .icon-cross {
             display: block;
-            color: @red;
+            color: @validation-error;
         }
     }
 }
@@ -234,7 +234,7 @@
 }
 
 @media all and (max-width:@device-width-medium){
-  .dragndropwi-inner .dragndropwi-answers .dragndropwi-answer {max-width: 42%;}
-  .dragndropwi-inner .dragndropwi-question {max-width: 42%;justify-content: center; align-items: center; padding: 10px;}
-  .dragndropwi-inner .dragndropwi-question .dragndropwi-item-graphic {display: flex; justify-content: center; align-items: center;}
+  .dragndropwi__inner .dragndropwi-answers .dragndropwi-answer {max-width: 42%;}
+  .dragndropwi__inner .dragndropwi-question {max-width: 42%;justify-content: center; align-items: center; padding: 10px;}
+  .dragndropwi__inner .dragndropwi-question .dragndropwi-item-graphic {display: flex; justify-content: center; align-items: center;}
 }
