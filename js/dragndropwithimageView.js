@@ -29,6 +29,7 @@ define([
 
       // Make sure each item's accepted answer is an array - even single values
       // This simplifies future operations
+
       _.each(this.model.get("_items"), function (item) {
         _.each(item.accepted, function (mraccepted) {
           let accepted = mraccepted.src;
@@ -77,6 +78,22 @@ define([
           position: $draggable.offset(),
         });
       });
+
+      let _maxScore = 0;
+
+      _.each(this.model.get("_items"), function (item) {
+        const { accepted } = item;
+        const _acceptedSrc = accepted.map((item) => item.src);
+        _maxScore += _acceptedSrc.length;
+        _.each(item.accepted, function (mraccepted) {
+          let accepted = mraccepted.src;
+          if (typeof accepted === "string") accepted = [accepted];
+        });
+      });
+
+      this.$(".dragndropwi-score")
+        .html(`${0}/${_maxScore}`)
+        .css("color", "red");
     },
 
     restoreUserAnswer: function () {
@@ -861,7 +878,7 @@ define([
           this.$(".dragndropwi-question"),
           function (question, index) {
             const $container = $(
-              '<div class="accepted-answer" style="padding: 10px; display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; gap: 10px;"></div>'
+              '<div class="accepted-answer" style="padding: 10px; display: block; position: absolute; top: 0; left: 0; width: 100%; display: flex; gap: 10px; flex-wrap: wrap"></div>'
             );
             const imageSources = items[parseInt(index)].accepted.map(
               (item) => item.src
@@ -871,7 +888,7 @@ define([
               const $img = $("<img />").attr("src", src);
 
               const $imgContainer = $(
-                "<div style='max-width: 188px; height: fit-content;'></div>"
+                "<div style='max-width: 188px; height: fit-content; width: 30%'></div>"
               );
               $imgContainer.append($img);
               $container.append($imgContainer);
