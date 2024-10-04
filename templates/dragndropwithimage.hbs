@@ -6,19 +6,19 @@
 
             <div class="dragndropwi-overlay"></div>
 
+            <div class="dragndropwi-score"></div>
+
             <div class="dragndropwi-questions">
                 {{#each _items}}
                 <div class="dragndropwi-question clearfix {{_classes}}" data-index="{{@index}}">
-                    <div class="dragndropwi-question-state">
+                    {{!-- <div class="dragndropwi-question-state">
                         <div class="dragndropwi-correct-icon icon icon-tick"></div>
                         <div class="dragndropwi-incorrect-icon icon icon-cross"></div>
-                    </div>
+                    </div> --}}
                     <div class="dragndropwi-question-text">{{this.text}}</div>
-                   
                     {{#each accepted}}
                     <div class="dragndropwi-item dragndropwi-droppable ui-state-enabled" data-index="{{@../index}}"></div>
                     {{/each}}
-                    
                     {{#if _graphic}}
                         {{#if _graphic.src}}
                             <div class="dragndropwi-item-graphic">
