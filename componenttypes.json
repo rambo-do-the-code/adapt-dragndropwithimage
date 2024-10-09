@@ -84,9 +84,7 @@
                 "_score": {
                   "type": "number",
                   "required": "false",
-                  "default": {
-                    "$numberLong": "0"
-                  },
+                  "default": 0,
                   "title": "Score",
                   "inputType": "Number",
                   "validators": [
