@@ -1,12 +1,13 @@
 define([
     'core/js/adapt',
     './dragndropwithimageView',
-    'core/js/models/questionModel'
-], function(Adapt, DragndropwithimageView, QuestionModel,) {
+    'core/js/models/questionModel',
+    './dragndropwithimageModel'
+], function(Adapt, DragndropwithimageView, QuestionModel, DragndropwithimageModel) {
 
     return Adapt.register("dragndropwithimage", {
         view: DragndropwithimageView,
-        model: QuestionModel
+        model: DragndropwithimageModel
     });
 
 });

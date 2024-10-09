@@ -80,6 +80,20 @@
                     "required"
                   ],
                   "help": "Image which will be rendered with the item block."
+                },
+                "_score": {
+                  "type": "number",
+                  "required": "false",
+                  "default": {
+                    "$numberLong": "0"
+                  },
+                  "title": "Score",
+                  "inputType": "Number",
+                  "validators": [
+                    "required",
+                    "number"
+                  ],
+                  "help": "If item scoring is enabled, selected item scores are summed to give the question score."
                 }
               }
             }
@@ -478,6 +492,17 @@
           "translatable": true
         }
       }
+    },
+    "_hasItemScoring": {
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "title": "Enable item scoring",
+      "inputType": "Checkbox",
+      "validators": [
+        ""
+      ],
+      "help": "When disabled, this question scores 0 for incorrect and 'Question Weight' for correct. When enabled, this question scores by summing the scores of the selected options."
     }
   },
   "globals": {
