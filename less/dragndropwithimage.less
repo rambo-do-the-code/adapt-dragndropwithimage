@@ -36,6 +36,11 @@
     flex-wrap: wrap;
     justify-content: space-around;
     align-items: flex-end;
+    @media screen and (max-width: 768px) {
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 0px;
+    }
   }
 
   .dragndropwi-question {
@@ -257,7 +262,7 @@
     max-width: 42%;
   }
   .dragndropwi__inner .dragndropwi-question {
-    max-width: 42%;
+    max-width: 100%;
     justify-content: center;
     align-items: center;
     padding: 10px;
