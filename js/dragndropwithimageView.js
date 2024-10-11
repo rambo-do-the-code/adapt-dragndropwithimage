@@ -2,9 +2,8 @@ define([
   'coreJS/adapt',
   'coreViews/questionView',
   'libraries/jquery-ui.min',
-  'libraries/jquery.ui.touch-punch',
-  'libraries/jquery-collison'
-], function (Adapt, QuestionView, JQueryUI, TouchPunch, Collision) {
+  'libraries/jquery.ui.touch-punch'
+], function (Adapt, QuestionView, JQueryUI, TouchPunch) {
   const DragndropwithimageView = QuestionView.extend({
     events: {
       'dragcreate .ui-draggable': 'onDragCreate',
@@ -53,15 +52,7 @@ define([
         containment: this.$(this.containerClass),
         snap: '.ui-state-enabled',
         snapMode: 'inner',
-        snapTolerance: 12,
-        obstacle: '.butNotHere',
-        preventCollision: true,
-        start: function(event, ui) {
-          $(this).removeClass('butNotHere');
-        },
-        stop: function(event, ui) {
-          $(this).addClass('butNotHere');
-        }
+        snapTolerance: 12
       });
 
       // Activate droppables and set heights from draggable heights
@@ -305,7 +296,7 @@ define([
         item._userAnswer = [userAnswer];
       }
 
-      this.placeDraggable(this.$currentDraggable, this.$currentDroppable, 200);
+      this.placeDraggable(this.$currentDraggable, this.$currentDroppable, 200, questionIndex);
       this.storeUserAnswer();
     },
 
@@ -335,12 +326,44 @@ define([
       this.$currentDroppable = $target;
     },
 
-    placeDraggable: function ($draggable, $droppable, animationTime) {
+    placeDraggable: function ($draggable, $droppable, animationTime, i = null) {
       if (typeof animationTime !== 'number') animationTime = this.animationTime;
       const animationClass = 'dragndrop-transition-' + animationTime;
+      let _row = 0; let _col = 0;
+      const itemWidth = $draggable.width();
+      const itemHeight = $draggable.height();
+      const containerWith = $droppable.width();
 
-      $draggable.removeClass('ui-state-placed').addClass(animationClass);
-      // .offset($droppable.offset());
+      if (!Number.isNaN(i)) {
+        // const numOfUserAnswer = this.model.get('_items')[i]?._userAnswer?.filter(item => !!item)?.length ?? 0;
+        // console.log(this.model.get('_items')[i]?._userAnswer, $draggable.html());
+        console.log(this.model.get('_items')[i]?._userAnswer);
+        let numOfUserAnswer = this.model.get('_items')[i]?._userAnswer.findIndex(item => item === $draggable.html());
+        if (numOfUserAnswer === -1) {
+          numOfUserAnswer = 0;
+        }
+
+        const itemsPerRow = Math.floor((containerWith + 30) / itemWidth);
+
+        function getRowAndCol(n, m) {
+          const row = Math.floor((n - 1) / m);
+          const col = (n - 1) % m;
+          return { row, col };
+        }
+        console.log(numOfUserAnswer);
+        const { row, col } = getRowAndCol(numOfUserAnswer + 1, itemsPerRow);
+
+        _row = row;
+        _col = col;
+        console.log(row, col);
+      }
+
+      $draggable.removeClass('ui-state-placed').addClass(animationClass)
+        // .offset($droppable.offset())
+        // .css({
+        //   transform: `translate(${_col * itemWidth}px, ${_row * itemHeight}px)`
+        // });
+
       $droppable
         .removeClass('ui-state-enabled')
         .addClass('ui-state-disabled')
@@ -491,7 +514,9 @@ define([
       $draggable
         .animate(position, animationTime)
         .removeClass('ui-state-placed')
-        .data('droppable', null);
+        .data('droppable', null).css({
+          transform: 'unset'
+        });
     },
 
     /** ************************************ QUESTION METHODS **************************************/
@@ -772,7 +797,7 @@ define([
           const that = this;
           setTimeout(function () {
             $.drop
-              ? that.placeDraggable($.drag, $.drop, 600)
+              ? that.placeDraggable($.drag, $.drop, 600, i)
               : that.resetDraggable($.drag, null, 600);
           }, t);
         },
