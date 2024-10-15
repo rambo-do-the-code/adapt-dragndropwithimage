@@ -156,10 +156,10 @@
         z-index: 12;
       }
       &.ui-state-placed {
-        // z-index: -1;
-        //background: none;
-        color: transparent;
-        //opacity: 0;
+        z-index: -1;
+        background: none;
+        //color: transparent;
+        opacity: 0;
       }
       &.ui-state-placing {
         -webkit-transition: all 0.25s linear;
@@ -253,11 +253,15 @@
 }
 
 @media all and (max-width: @device-width-medium) {
+  .dragndropwi-questions {
+    flex-direction: column;
+    align-items: center;
+  }
   .dragndropwi__inner .dragndropwi-answers .dragndropwi-answer {
     max-width: 42%;
   }
   .dragndropwi__inner .dragndropwi-question {
-    max-width: 42%;
+    //max-width: 42%;
     justify-content: center;
     align-items: center;
     padding: 10px;
