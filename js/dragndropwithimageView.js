@@ -949,7 +949,7 @@ define([
           this
         );
         this.$('.dragndropwi-answers').css('visibility', 'hidden');
-        $('.user-answer').css('visibility', 'hidden');
+        $('.user-answer').css({ visibility: 'hidden' });
       } else {
         _.each(
           this.$('.dragndropwi-question'),
@@ -959,7 +959,7 @@ define([
           this
         );
         this.$('.dragndropwi-answers').css('visibility', 'visible');
-        $('.user-answer').css('visibility', 'visible');
+        $('.user-answer').css({ visibility: 'visible' });
       }
     },
 
@@ -975,6 +975,7 @@ define([
     },
 
     setScore: function () {
+      $('.user-answer').css('pointer-events', 'none');
       const numberOfCorrectAnswers =
         this.model.get('_numberOfCorrectAnswers') || 0;
       const questionWeight = this.model.get('_questionWeight');
