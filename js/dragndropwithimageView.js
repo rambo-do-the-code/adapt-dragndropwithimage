@@ -333,12 +333,12 @@ define([
       const that = this;
 
       if (!isShowAnswer) {
-        $('.user-answer').remove();
+        this.$('.dragndropwi-question').find('.user-answer').remove();
         _.each(
           this.$('.dragndropwi-question'),
           function (question, index) {
             const $container = $(
-              '<div class="user-answer" style="padding: 10px; display: block; position: absolute; top: 0; left: 0; width: 100%; display: flex; gap: 10px; flex-wrap: wrap; z-index:1000;"></div>'
+              '<div class="user-answer" style="padding: 10px; display: block; position: absolute; top: 0; left: 0; width: 100%; display: flex; gap: 10px; flex-wrap: wrap;"></div>'
             );
             const imageSources = items?.[parseInt(index)]?._userAnswer?.filter(item => !!item)?.reverse() || [];
 
@@ -820,7 +820,7 @@ define([
           setTimeout(function () {
             $.drop
               ? that.placeDraggable($.drag, $.drop, 600, i, true)
-              : that.resetDraggable($.drag, null, 600, null, true);
+              : that.resetDraggable($.drag, null, 600);
           }, t);
         },
         this
@@ -949,7 +949,7 @@ define([
           this
         );
         this.$('.dragndropwi-answers').css('visibility', 'hidden');
-        $('.user-answer').css({ visibility: 'hidden' });
+        this.$('.dragndropwi-question').find('.user-answer').css({ visibility: 'hidden' });
       } else {
         _.each(
           this.$('.dragndropwi-question'),
@@ -958,8 +958,18 @@ define([
           },
           this
         );
+
         this.$('.dragndropwi-answers').css('visibility', 'visible');
-        $('.user-answer').css({ visibility: 'visible' });
+        _.each(
+          this.$('.dragndropwi-answers').find('.dragndropwi-item'),
+          function(item, index) {
+
+            if (userAnswers.includes($(item).html())) {
+              $(item).css('visibility', 'hidden');
+            }
+          }, this
+        );
+        this.$('.dragndropwi-question').find('.user-answer').css({ visibility: 'visible' });
       }
     },
 
@@ -975,7 +985,7 @@ define([
     },
 
     setScore: function () {
-      $('.user-answer').css('pointer-events', 'none');
+      this.$('.dragndropwi-question').find('.user-answer').css('pointer-events', 'none');
       const numberOfCorrectAnswers =
         this.model.get('_numberOfCorrectAnswers') || 0;
       const questionWeight = this.model.get('_questionWeight');
