@@ -264,6 +264,7 @@ define([
 
 			this.placeDraggable(this.$currentDraggable, this.$currentDroppable, 200);
 			this.storeUserAnswer();
+			this.setScore();
 		},
 
 		onDropOut: function(e, ui) {
