@@ -373,7 +373,7 @@ define([
               });
 
               const $imgContainer = $(
-                "<div style='max-width: 120px; height: fit-content; width: 30%'></div>"
+                "<div class='img-drag'></div>"
               );
               $imgContainer.append($img);
               $container.append($imgContainer);
@@ -938,7 +938,7 @@ define([
               const $img = $('<img />').attr('src', src);
 
               const $imgContainer = $(
-                "<div style='max-width: 120px; height: fit-content; width: 30%'></div>"
+                "<div class='img-drag'></div>"
               );
               $imgContainer.append($img);
               $container.append($imgContainer);
