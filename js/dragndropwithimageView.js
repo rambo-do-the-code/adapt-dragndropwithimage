@@ -1005,7 +1005,11 @@ define([
         _maxScore += _acceptedSrc.length;
       });
 
-      this.model.set('_score', score);
+      this.model.set('_score', {
+        score: _score,
+        maxScore: _maxScore,
+        scaled : _score / _maxScore
+      });
       this.$('.dragndropwi-score')
         .html(`${_score}/${_maxScore}`)
         .css('color', _score === _maxScore ? 'green' : 'red');
