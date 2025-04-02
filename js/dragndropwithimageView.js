@@ -29,6 +29,15 @@ define([
 
       // Make sure each item's accepted answer is an array - even single values
       // This simplifies future operations
+      const totalQuestions = this.model.get('_items').length;
+      let totalColumns = 1;
+      if(totalQuestions % 3 === 0){
+        totalColumns = 3;
+      } else if(totalQuestions % 2 === 0){
+        totalColumns = 2;
+      } 
+      this.model.set('_totalQuestions', totalQuestions);
+      this.model.set('_totalColumns', totalColumns);
 
       _.each(this.model.get('_items'), function (item) {
         _.each(item.accepted, function (mraccepted) {
