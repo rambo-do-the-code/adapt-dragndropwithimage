@@ -99,12 +99,21 @@ define([
           if (typeof accepted === 'string') accepted = [accepted];
         });
       });
-
-      this.$('.dragndropwi-score')
-        .html(`${0}/${_maxScore}`)
-        .css('color', 'red');
+      this.renderCurrentAnswers(0, _maxScore);
+      this.renderScore(0, _maxScore);
     },
 
+    renderCurrentAnswers: function (answers, questions) {
+      this.$('.dragndropwi-useranswers')
+        .html(`${answers}/${questions}`)
+        .removeClass('done notdone')
+        .addClass(answers === questions ? 'done' : 'notdone');
+    },
+    renderScore: function (score, maxScore) {
+      this.$('.dragndropwi-score')
+        .html(`${score}/${maxScore}`)
+        .css('color', score === maxScore ? 'green' : 'red');
+    },
     restoreUserAnswer: function () {
       if (!this.model.get('_isSubmitted')) return;
 
@@ -307,6 +316,23 @@ define([
 
       this.placeDraggable(this.$currentDraggable, this.$currentDroppable, 200, questionIndex);
       this.storeUserAnswer();
+
+      /*  */
+      const _userAnswer = this.model.get('_userAnswer');
+      const _userAnswerNum = _userAnswer.filter((item) => item !== -1).length;
+      const questions = this.model.get('_items');
+      const questionsAnsweredNum = questions.reduce((acc, item) => {
+        const acceptedAnswers = item.accepted.length || 0;
+        acc = acc + acceptedAnswers;
+        return acc;
+      }, 0);
+      // console.log({
+      //   _userAnswer,
+      //   _userAnswerNum,
+      //   questions,
+      //   questionsAnsweredNum
+      // });
+      this.renderCurrentAnswers(_userAnswerNum, questionsAnsweredNum);
     },
 
     onDropOut: function (e, ui) {
@@ -1019,9 +1045,7 @@ define([
         maxScore: _maxScore,
         scaled : _score / _maxScore
       });
-      this.$('.dragndropwi-score')
-        .html(`${_score}/${_maxScore}`)
-        .css('color', _score === _maxScore ? 'green' : 'red');
+      this.renderScore(_score, _maxScore);
     },
 
     disableQuestion: function () {
