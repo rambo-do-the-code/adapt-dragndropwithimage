@@ -29,6 +29,17 @@ define([
 
       // Make sure each item's accepted answer is an array - even single values
       // This simplifies future operations
+      const totalQuestions = this.model.get('_items').length;
+      let totalColumns = 1;
+      if(totalQuestions === 4){
+        totalColumns = 4;
+      } else if(totalQuestions % 3 === 0){
+        totalColumns = 3;
+      } else if(totalQuestions % 2 === 0){
+        totalColumns = 2;
+      } 
+      this.model.set('_totalQuestions', totalQuestions);
+      this.model.set('_totalColumns', totalColumns);
 
       _.each(this.model.get('_items'), function (item) {
         _.each(item.accepted, function (mraccepted) {
@@ -90,12 +101,21 @@ define([
           if (typeof accepted === 'string') accepted = [accepted];
         });
       });
-
-      this.$('.dragndropwi-score')
-        .html(`${0}/${_maxScore}`)
-        .css('color', 'red');
+      this.renderCurrentAnswers(0, _maxScore);
+      this.renderScore(0, _maxScore);
     },
 
+    renderCurrentAnswers: function (answers, questions) {
+      this.$('.dragndropwi-useranswers')
+        .html(`${answers}/${questions}`)
+        .removeClass('done notdone')
+        .addClass(answers === questions ? 'done' : 'notdone');
+    },
+    renderScore: function (score, maxScore) {
+      this.$('.dragndropwi-score')
+        .html(`${score}/${maxScore}`)
+        .css('color', score === maxScore ? 'green' : 'red');
+    },
     restoreUserAnswer: function () {
       if (!this.model.get('_isSubmitted')) return;
 
@@ -269,7 +289,12 @@ define([
         !this.$currentDroppable ||
         this.$currentDroppable.is('.ui-state-disabled')
       ) {
-        this.resetDraggable();
+        // If we're not over a valid droppable, handle as a drag-out
+        if (fromDroppable) {
+          this.onDragOut(e, ui);
+        } else {
+          this.resetDraggable();
+        }
         return;
       }
 
@@ -298,8 +323,25 @@ define([
 
       this.placeDraggable(this.$currentDraggable, this.$currentDroppable, 200, questionIndex);
       this.storeUserAnswer();
-    },
 
+      /*  */
+      const _userAnswer = this.model.get('_userAnswer');
+      const _userAnswerNum = _userAnswer.filter((item) => item !== -1).length;
+      const questions = this.model.get('_items');
+      const questionsAnsweredNum = questions.reduce((acc, item) => {
+        const acceptedAnswers = item.accepted.length || 0;
+        acc = acc + acceptedAnswers;
+        return acc;
+      }, 0);
+      // console.log({
+      //   _userAnswer,
+      //   _userAnswerNum,
+      //   questions,
+      //   questionsAnsweredNum
+      // });
+      this.renderCurrentAnswers(_userAnswerNum, questionsAnsweredNum);
+    },
+    
     onDropOut: function (e, ui) {
       $(e.target).removeClass('ui-state-hover');
       const $droppable = this.$currentDraggable.data('droppable');
@@ -308,6 +350,27 @@ define([
           .removeClass('ui-state-disabled')
           .removeClass('nomorespace')
           .addClass('ui-state-enabled');
+          
+        // Get the question index and item
+        const questionIndex = $droppable.closest('.dragndropwi-question').attr('data-index');
+        const item = this.model.get('_items')[questionIndex];
+        
+        // Get the answer being removed
+        const userAnswer = this.$currentDraggable.text();
+        
+        // Remove this answer from the item's user answers
+        if (item && item._userAnswer) {
+          item._userAnswer = item._userAnswer.filter(answer => answer !== userAnswer);
+        }
+        
+        // Update the UI to reflect the removed answer
+        $droppable.closest('.dragndropwi-question').find(`.user-answer img[src="${userAnswer}"]`).remove();
+        
+        // Update the user answer storage
+        this.storeUserAnswer();
+        
+        // Update the answer count display
+        this.updateAnswerCount();
       }
 
       if (this.$currentDroppable && e.target === this.$currentDroppable[0]) {
@@ -1010,9 +1073,7 @@ define([
         maxScore: _maxScore,
         scaled : _score / _maxScore
       });
-      this.$('.dragndropwi-score')
-        .html(`${_score}/${_maxScore}`)
-        .css('color', _score === _maxScore ? 'green' : 'red');
+      this.renderScore(_score, _maxScore);
     },
 
     disableQuestion: function () {
@@ -1021,6 +1082,52 @@ define([
 
     enableQuestion: function () {
       this.$('.dragndropwi-answers').children().draggable('enable');
+    },
+
+    onDragOut: function (e, ui) {
+      // This method can be called from onDragStop when a draggable is not over any droppable
+      if (!this.$currentDroppable) {
+        const $draggable = $(e.target);
+        const fromDroppable = $draggable.data('fromDroppable');
+        
+        if (fromDroppable) {
+          // Get the question index and item
+          const questionIndex = fromDroppable.closest('.dragndropwi-question').attr('data-index');
+          const item = this.model.get('_items')[questionIndex];
+          
+          // Get the answer being removed
+          const userAnswer = $draggable.text();
+          
+          // Remove this answer from the item's user answers
+          if (item && item._userAnswer) {
+            item._userAnswer = item._userAnswer.filter(answer => answer !== userAnswer);
+          }
+          
+          // Update the UI
+          fromDroppable.closest('.dragndropwi-question').find(`.user-answer img[src="${userAnswer}"]`).remove();
+          
+          // Reset the draggable to its original position
+          this.resetDraggable($draggable);
+          
+          // Update the user answer storage
+          this.storeUserAnswer();
+          
+          // Update the answer count display
+          this.updateAnswerCount();
+        }
+      }
+    },
+
+    updateAnswerCount: function() {
+      const _userAnswer = this.model.get('_userAnswer');
+      const _userAnswerNum = _userAnswer.filter((item) => item !== -1).length;
+      const questions = this.model.get('_items');
+      const questionsAnsweredNum = questions.reduce((acc, item) => {
+        const acceptedAnswers = item.accepted.length || 0;
+        acc = acc + acceptedAnswers;
+        return acc;
+      }, 0);
+      this.renderCurrentAnswers(_userAnswerNum, questionsAnsweredNum);
     }
   });
 
