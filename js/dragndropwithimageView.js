@@ -31,7 +31,7 @@ define([
       // This simplifies future operations
       const totalQuestions = this.model.get('_items').length;
       let totalColumns = 1;
-      if(totalQuestions === 4){
+      if(totalQuestions % 4 === 0){
         totalColumns = 4;
       } else if(totalQuestions % 3 === 0){
         totalColumns = 3;
