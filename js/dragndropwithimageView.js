@@ -22,16 +22,16 @@ define([
       this.$scrollElement = $(window);
       this.animationTime = 300;
       this.animationDelay = 100;
-
-      // Set default question type if not specified
-      if (this.model.get('_questionType') === undefined) {
-        // Check if any item has multiple accepted answers to determine default type
-        const hasMultipleAnswers = _.some(this.model.get('_items'), function(item) {
-          return item.accepted && item.accepted.length > 1;
-        });
-        this.model.set('_questionType', hasMultipleAnswers ? 'multiple' : 'single');
-      }
+      this.questionType = null;
       
+      // Set default question type if not specified
+      const hasMultipleAnswers = _.some(this.model.get('_items'), function(item) {
+        return item.accepted && item.accepted.length > 1;
+      });
+      this.questionType = hasMultipleAnswers ? 'multiple' : 'single';
+      this.model.set('_questionType', this.questionType);
+      
+
       // Create a single, random array of all available answers
       const possibleAnswers = _.shuffle(this.getAnswers(true));
       this.model.set('_possibleAnswers', possibleAnswers);
@@ -39,14 +39,23 @@ define([
       // Make sure each item's accepted answer is an array - even single values
       // This simplifies future operations
       const totalQuestions = this.model.get('_items').length;
+
       let totalColumns = 1;
 
-      if (totalQuestions % 4 <= 3 && totalQuestions >= 4) {
-        totalColumns = 4;
-      } else if (totalQuestions % 3 <= 2 && totalQuestions >= 3) {
-        totalColumns = 3;
-      } else if (totalQuestions % 2 <= 1 && totalQuestions >= 2) {
-        totalColumns = 2;
+      if (this.questionType === 'multiple') {
+        if (totalQuestions > 3) {
+          totalColumns = 3;
+        } else {
+          totalColumns = totalQuestions;
+        }
+      } else if (this.questionType === 'single') {
+        if (totalQuestions >= 6) {
+          totalColumns = 6;
+        } else if (totalQuestions === 3) {
+          totalColumns = 3;
+        } else {
+          totalColumns = totalQuestions;
+        }
       }
     
       this.model.set('_totalQuestions', totalQuestions);
