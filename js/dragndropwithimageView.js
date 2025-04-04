@@ -23,6 +23,15 @@ define([
       this.animationTime = 300;
       this.animationDelay = 100;
 
+      // Set default question type if not specified
+      if (this.model.get('_questionType') === undefined) {
+        // Check if any item has multiple accepted answers to determine default type
+        const hasMultipleAnswers = _.some(this.model.get('_items'), function(item) {
+          return item.accepted && item.accepted.length > 1;
+        });
+        this.model.set('_questionType', hasMultipleAnswers ? 'multiple' : 'single');
+      }
+      
       // Create a single, random array of all available answers
       const possibleAnswers = _.shuffle(this.getAnswers(true));
       this.model.set('_possibleAnswers', possibleAnswers);
