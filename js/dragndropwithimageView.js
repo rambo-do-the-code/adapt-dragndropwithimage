@@ -421,7 +421,7 @@ define([
           this.$('.dragndropwi-question'),
           function (question, index) {
             const $container = $(
-              '<div class="user-answer" style="padding: 10px; display: block; position: absolute; top: 0; left: 0; width: 100%; display: flex; gap: 10px; flex-wrap: wrap; z-index: 20;"></div>'
+              '<div class="user-answer" style="padding: 10px; display: block; position: absolute; top: 43px; left: 23px; width: 100%; display: flex; gap: 10px; flex-wrap: wrap; z-index: 20;"></div>'
             );
             const imageSources = items?.[parseInt(index)]?._userAnswer?.filter(item => !!item)?.reverse() || [];
 
