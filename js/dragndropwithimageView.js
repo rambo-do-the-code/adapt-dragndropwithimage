@@ -73,6 +73,8 @@ define([
       this.setupDragAndDropItems();
       this.restoreUserAnswer();
       this.setReadyStatus();
+      // Disable submit button on render using existing method
+      this.disableButtonActions(true);
     },
 
     setupDragAndDropItems: function () {
@@ -130,6 +132,8 @@ define([
         .html(`${answers}/${questions}`)
         .removeClass('done notdone')
         .addClass(answers === questions ? 'done' : 'notdone');
+      // Update submit button state using existing method
+      this.disableButtonActions(!this.canSubmit());
     },
     renderScore: function (score, maxScore) {
       this.$('.dragndropwi-score')
@@ -730,6 +734,8 @@ define([
             .text(accepted);
         });
       });
+      // Re-disable submit button after reset using existing method
+      this.disableButtonActions(true);
     },
 
     hideCorrectAnswer: function () {
