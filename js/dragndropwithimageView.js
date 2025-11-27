@@ -1,9 +1,31 @@
+function requireWithRetry(deps, onOk, onErr, retries = 3, delayMs = 400) {
+  require(
+    deps,
+    onOk,
+    function (err) {
+      if (retries <= 0) {
+        console.error("Require failed after retries:", err);
+        onErr && onErr(err);
+        return;
+      }
+      console.warn("Require failed, retrying...", err);
+      setTimeout(function () {
+        requireWithRetry(deps, onOk, onErr, retries - 1, delayMs * 2);
+      }, delayMs);
+    }
+  );
+}
+
+
 define([
   'coreJS/adapt',
   'coreViews/questionView',
   'libraries/jquery-ui.min',
-  'libraries/jquery.ui.touch-punch'
-], function (Adapt, QuestionView, JQueryUI, TouchPunch) {
+], function (Adapt, QuestionView ) {
+  // if (!$.ui || !$.ui.mouse) {
+  //   console.error("jQuery UI mouse missing or not ready");
+  //   return QuestionView.extend({}); 
+  // }
   const DragndropwithimageView = QuestionView.extend({
     events: {
       'dragcreate .ui-draggable': 'onDragCreate',
@@ -16,6 +38,24 @@ define([
     },
 
     /** ************************************ SETUP METHODS **************************************/
+
+    requireWithRetry: function(deps, onOk, onErr, retries = 3, delayMs = 400) {
+  require(
+    deps,
+    onOk,
+    function (err) {
+      if (retries <= 0) {
+        console.error("Require failed after retries:", err);
+        onErr && onErr(err);
+        return;
+      }
+      console.warn("Require failed, retrying...", err);
+      setTimeout(function () {
+        requireWithRetry(deps, onOk, onErr, retries - 1, delayMs * 2);
+      }, delayMs);
+    }
+  );
+},
 
     setupQuestion: function () {
       this.containerClass = '.dragndropwi__widget';
@@ -70,11 +110,22 @@ define([
     },
 
     onQuestionRendered: function () {
-      this.setupDragAndDropItems();
-      this.restoreUserAnswer();
-      this.setReadyStatus();
-      // Disable submit button on render using existing method
-      this.disableButtonActions(true);
+      const self = this;
+     self.requireWithRetry(
+        ['libraries/jquery.ui.touch-punch'],
+        function () {
+          // touch-punch đã load và patch xong
+          self.setupDragAndDropItems();
+          self.restoreUserAnswer();
+          self.setReadyStatus();
+          self.disableButtonActions(true);
+        },
+        function (err) {
+          console.error("touch-punch still failed, fallback desktop only", err);
+          self.setupDragAndDropItems(); // desktop vẫn kéo bằng mouse ok
+        },
+        3
+      );
     },
 
     setupDragAndDropItems: function () {
@@ -85,7 +136,8 @@ define([
         containment: this.$(this.containerClass),
         snap: '.ui-state-enabled',
         snapMode: 'inner',
-        snapTolerance: 12
+        snapTolerance: 12,
+        scroll: false
       });
 
       // Activate droppables and set heights from draggable heights
