@@ -1,548 +1,557 @@
 function requireWithRetry(deps, onOk, onErr, retries = 3, delayMs = 400) {
-  require(
-    deps,
-    onOk,
-    function (err) {
-      if (retries <= 0) {
-        console.error("Require failed after retries:", err);
-        onErr && onErr(err);
-        return;
-      }
-      console.warn("Require failed, retrying...", err);
-      setTimeout(function () {
-        requireWithRetry(deps, onOk, onErr, retries - 1, delayMs * 2);
-      }, delayMs);
+  require(deps, onOk, function (err) {
+    if (retries <= 0) {
+      console.error("Require failed after retries:", err)
+      onErr && onErr(err)
+      return
     }
-  );
+    console.warn("Require failed, retrying...", err)
+    setTimeout(function () {
+      requireWithRetry(deps, onOk, onErr, retries - 1, delayMs * 2)
+    }, delayMs)
+  })
 }
 
-
 define([
-  'coreJS/adapt',
-  'coreViews/questionView',
-  'libraries/jquery-ui.min',
-], function (Adapt, QuestionView ) {
+  "coreJS/adapt",
+  "coreViews/questionView",
+  "libraries/jquery-ui.min",
+], function (Adapt, QuestionView) {
   // if (!$.ui || !$.ui.mouse) {
   //   console.error("jQuery UI mouse missing or not ready");
-  //   return QuestionView.extend({}); 
+  //   return QuestionView.extend({});
   // }
   const DragndropwithimageView = QuestionView.extend({
     events: {
-      'dragcreate .ui-draggable': 'onDragCreate',
-      'dragstart .ui-draggable': 'onDragStart',
-      'drag .ui-draggable': 'onDrag',
-      'dragstop .ui-draggable': 'onDragStop',
-      'drop .ui-droppable': 'onDrop',
-      'dropout .ui-droppable': 'onDropOut',
-      'dropover .ui-droppable': 'onDropOver'
+      "dragcreate .ui-draggable": "onDragCreate",
+      "dragstart .ui-draggable": "onDragStart",
+      "drag .ui-draggable": "onDrag",
+      "dragstop .ui-draggable": "onDragStop",
+      "drop .ui-droppable": "onDrop",
+      "dropout .ui-droppable": "onDropOut",
+      "dropover .ui-droppable": "onDropOver",
     },
 
     /** ************************************ SETUP METHODS **************************************/
 
-    requireWithRetry: function(deps, onOk, onErr, retries = 3, delayMs = 400) {
-  require(
-    deps,
-    onOk,
-    function (err) {
-      if (retries <= 0) {
-        console.error("Require failed after retries:", err);
-        onErr && onErr(err);
-        return;
-      }
-      console.warn("Require failed, retrying...", err);
-      setTimeout(function () {
-        requireWithRetry(deps, onOk, onErr, retries - 1, delayMs * 2);
-      }, delayMs);
-    }
-  );
-},
+    requireWithRetry: function (deps, onOk, onErr, retries = 3, delayMs = 400) {
+      require(deps, onOk, function (err) {
+        if (retries <= 0) {
+          console.error("Require failed after retries:", err)
+          onErr && onErr(err)
+          return
+        }
+        console.warn("Require failed, retrying...", err)
+        setTimeout(function () {
+          requireWithRetry(deps, onOk, onErr, retries - 1, delayMs * 2)
+        }, delayMs)
+      })
+    },
 
     setupQuestion: function () {
-      this.containerClass = '.dragndropwi__widget';
-      this.$scrollElement = $(window);
-      this.animationTime = 300;
-      this.animationDelay = 100;
-      this.questionType = null;
-      
+      this.containerClass = ".dragndropwi__widget"
+      this.$scrollElement = $(window)
+      this.animationTime = 300
+      this.animationDelay = 100
+      this.questionType = null
+
       // Set default question type if not specified
-      const hasMultipleAnswers = _.some(this.model.get('_items'), function(item) {
-        return item.accepted && item.accepted.length > 1;
-      });
-      this.questionType = hasMultipleAnswers ? 'multiple' : 'single';
-      this.model.set('_questionType', this.questionType);
-      
+      const hasMultipleAnswers = _.some(
+        this.model.get("_items"),
+        function (item) {
+          return item.accepted && item.accepted.length > 1
+        }
+      )
+      this.questionType = hasMultipleAnswers ? "multiple" : "single"
+      this.model.set("_questionType", this.questionType)
 
       // Create a single, random array of all available answers
-      const possibleAnswers = _.shuffle(this.getAnswers(true));
-      this.model.set('_possibleAnswers', possibleAnswers);
+      const possibleAnswers = _.shuffle(this.getAnswers(true))
+      this.model.set("_possibleAnswers", possibleAnswers)
 
       // Make sure each item's accepted answer is an array - even single values
       // This simplifies future operations
-      const totalQuestions = this.model.get('_items').length;
+      const totalQuestions = this.model.get("_items").length
 
-      let totalColumns = 1;
+      let totalColumns = 1
 
-      if (this.questionType === 'multiple') {
+      if (this.questionType === "multiple") {
         if (totalQuestions > 3) {
-          totalColumns = 3;
+          totalColumns = 3
         } else {
-          totalColumns = totalQuestions;
+          totalColumns = totalQuestions
         }
-      } else if (this.questionType === 'single') {
+      } else if (this.questionType === "single") {
         if (totalQuestions >= 6) {
-          totalColumns = 6;
+          totalColumns = 6
         } else if (totalQuestions === 3) {
-          totalColumns = 3;
+          totalColumns = 3
         } else {
-          totalColumns = totalQuestions;
+          totalColumns = totalQuestions
         }
       }
-    
-      this.model.set('_totalQuestions', totalQuestions);
-      this.model.set('_totalColumns', totalColumns);
 
-      _.each(this.model.get('_items'), function (item) {
+      this.model.set("_totalQuestions", totalQuestions)
+      this.model.set("_totalColumns", totalColumns)
+
+      _.each(this.model.get("_items"), function (item) {
         _.each(item.accepted, function (mraccepted) {
-          let accepted = mraccepted.src;
-          if (typeof accepted === 'string') accepted = [accepted];
-        });
-      });
+          let accepted = mraccepted.src
+          if (typeof accepted === "string") accepted = [accepted]
+        })
+      })
     },
 
     onQuestionRendered: function () {
-      const self = this;
-     self.requireWithRetry(
-        ['libraries/jquery.ui.touch-punch'],
-        function () {
-          // touch-punch đã load và patch xong
-          self.setupDragAndDropItems();
-          self.restoreUserAnswer();
-          self.setReadyStatus();
-          self.disableButtonActions(true);
-        },
-        function (err) {
-          console.error("touch-punch still failed, fallback desktop only", err);
-          self.setupDragAndDropItems(); // desktop vẫn kéo bằng mouse ok
-        },
-        3
-      );
+      const self = this
+      require(["libraries/jquery-ui.min"], () => {
+        if (!(jQuery.ui && jQuery.ui.mouse)) {
+          console.error("jQuery UI mouse missing")
+          return
+        }
+        require(["libraries/jquery.ui.touch-punch"], () => {
+          self.setupDragAndDropItems()
+          self.restoreUserAnswer()
+          self.setReadyStatus()
+          self.disableButtonActions(true)
+        })
+      })
     },
 
     setupDragAndDropItems: function () {
-      const $draggables = this.$('.dragndropwi-answer');
-      const $droppables = this.$('.dragndropwi-droppable');
+      const $draggables = this.$(".dragndropwi-answer")
+      const $droppables = this.$(".dragndropwi-droppable")
 
       $draggables.draggable({
         containment: this.$(this.containerClass),
-        snap: '.ui-state-enabled',
-        snapMode: 'inner',
+        snap: ".ui-state-enabled",
+        snapMode: "inner",
         snapTolerance: 12,
-        scroll: false
-      });
+        scroll: false,
+      })
 
       // Activate droppables and set heights from draggable heights
-      const hItem = $draggables.height();
+      const hItem = $draggables.height()
 
       $droppables
         .droppable({
-          activeClass: 'ui-state-active',
-          tolerance: 'intersect'
+          activeClass: "ui-state-active",
+          tolerance: "intersect",
         })
-        .height(hItem);
+        .height(hItem)
 
       // Set widths of all drag and drop items according to the widest element
-      const $items = this.$('.dragndropwi-item');
-      const wMax = this.getMaxWidth($items);
-      $items.width(wMax);
+      const $items = this.$(".dragndropwi-item")
+      const wMax = this.getMaxWidth($items)
+      $items.width(wMax)
 
       // Store original position of draggables
       _.each($draggables, function (draggable) {
-        const $draggable = $(draggable);
+        const $draggable = $(draggable)
         $draggable.data({
           originalPosition: { top: 0, left: 0 },
-          position: $draggable.offset()
-        });
-      });
+          position: $draggable.offset(),
+        })
+      })
 
-      let _maxScore = 0;
+      let _maxScore = 0
 
-      _.each(this.model.get('_items'), function (item) {
-        const { accepted } = item;
-        const _acceptedSrc = accepted.map((item) => item.src);
-        _maxScore += _acceptedSrc.length;
+      _.each(this.model.get("_items"), function (item) {
+        const { accepted } = item
+        const _acceptedSrc = accepted.map((item) => item.src)
+        _maxScore += _acceptedSrc.length
         _.each(item.accepted, function (mraccepted) {
-          let accepted = mraccepted.src;
-          if (typeof accepted === 'string') accepted = [accepted];
-        });
-      });
-      this.renderCurrentAnswers(0, _maxScore);
-      this.renderScore(0, _maxScore);
+          let accepted = mraccepted.src
+          if (typeof accepted === "string") accepted = [accepted]
+        })
+      })
+      this.renderCurrentAnswers(0, _maxScore)
+      this.renderScore(0, _maxScore)
     },
 
     renderCurrentAnswers: function (answers, questions) {
-      this.$('.dragndropwi-useranswers')
+      this.$(".dragndropwi-useranswers")
         .html(`${answers}/${questions}`)
-        .removeClass('done notdone')
-        .addClass(answers === questions ? 'done' : 'notdone');
+        .removeClass("done notdone")
+        .addClass(answers === questions ? "done" : "notdone")
       // Update submit button state using existing method
-      this.disableButtonActions(!this.canSubmit());
+      this.disableButtonActions(!this.canSubmit())
     },
     renderScore: function (score, maxScore) {
-      this.$('.dragndropwi-score')
+      this.$(".dragndropwi-score")
         .html(`${score}/${maxScore}`)
-        .css('color', score === maxScore ? 'green' : 'red');
+        .css("color", score === maxScore ? "green" : "red")
     },
     restoreUserAnswer: function () {
-      if (!this.model.get('_isSubmitted')) return;
+      if (!this.model.get("_isSubmitted")) return
 
-      const answers = this.getAnswers(true);
-      const userAnswers = this.model.get('_userAnswer');
-      const $droppables = this.$('.ui-droppable');
-      let i = -1;
+      const answers = this.getAnswers(true)
+      const userAnswers = this.model.get("_userAnswer")
+      const $droppables = this.$(".ui-droppable")
+      let i = -1
       if (userAnswers) {
-        _.each(this.model.get('_items'), function (item) {
+        _.each(this.model.get("_items"), function (item) {
           _.each(item.accepted, function (mraccepted) {
-            const theaccepted = mraccepted.src;
-          });
+            const theaccepted = mraccepted.src
+          })
 
-          item._userAnswer = [];
+          item._userAnswer = []
           _.each(item.accepted, function () {
-            i++;
-            item._userAnswer.push(answers[userAnswers[i]]);
-          });
-        });
+            i++
+            item._userAnswer.push(answers[userAnswers[i]])
+          })
+        })
 
         _.each(
           userAnswers,
           function (answerIndex, i) {
             if (answerIndex > -1) {
-              const answer = answers[answerIndex];
-              const $draggable = this.getDraggableByText(answer);
-              const $droppable = $droppables.eq(i);
-              this.placeDraggable($draggable, $droppable, 0);
+              const answer = answers[answerIndex]
+              const $draggable = this.getDraggableByText(answer)
+              const $droppable = $droppables.eq(i)
+              this.placeDraggable($draggable, $droppable, 0)
             }
           },
           this
-        );
+        )
       }
 
-      this.setQuestionAsSubmitted();
-      this.markQuestion();
-      this.setScore();
-      this.showMarking();
-      this.setupFeedback();
+      this.setQuestionAsSubmitted()
+      this.markQuestion()
+      this.setScore()
+      this.showMarking()
+      this.setupFeedback()
     },
 
     /** ************************************ HELPER METHODS **************************************/
 
     getMaxWidth: function ($collection) {
-      let wMax = 0;
+      let wMax = 0
       for (let i = 0; i < $collection.length; i++) {
-        const w = $collection.eq(i).width();
-        if (w > wMax) wMax = w;
+        const w = $collection.eq(i).width()
+        if (w > wMax) wMax = w
       }
-      return wMax + 1;
+      return wMax + 1
     },
 
     getDraggableByText: function (text) {
       const draggable = _.find(
-        this.$('.dragndropwi-answer'),
+        this.$(".dragndropwi-answer"),
         function (draggable) {
-          const $draggable = $(draggable);
-          return $draggable.text() === text;
+          const $draggable = $(draggable)
+          return $draggable.text() === text
         }
-      );
+      )
 
-      return $(draggable);
+      return $(draggable)
     },
 
     getAnswers: function (includeDummyAnswers) {
-      let answers = [];
-      _.each(this.model.get('_items'), function (item) {
+      let answers = []
+      _.each(this.model.get("_items"), function (item) {
         _.each(item.accepted, function (mraccepted) {
-          const accepted = mraccepted.src;
-          answers = answers.concat(accepted);
-        });
-      });
+          const accepted = mraccepted.src
+          answers = answers.concat(accepted)
+        })
+      })
 
       if (includeDummyAnswers) {
-        _.each(this.model.get('dummyAnswers'), function (mrdummy) {
-          const dummyAnswers = mrdummy.src;
-          if (dummyAnswers) answers = answers.concat(dummyAnswers);
-        });
+        _.each(this.model.get("dummyAnswers"), function (mrdummy) {
+          const dummyAnswers = mrdummy.src
+          if (dummyAnswers) answers = answers.concat(dummyAnswers)
+        })
       }
 
-      return answers;
+      return answers
     },
 
     /** ************************************ DRAG AND DROP METHODS **************************************/
 
     onDragCreate: function (e) {
-      const $draggable = $(e.target);
-      $draggable.css({ left: 0, top: 0 });
+      const $draggable = $(e.target)
+      $draggable.css({ left: 0, top: 0 })
     },
 
     onDragStart: function (e, ui) {
-      if (!this.model.get('_isEnabled')) return;
+      if (!this.model.get("_isEnabled")) return
 
-      this.winHeight = this.$scrollElement.height();
-      this.navHeight = $('.navigation').height();
+      this.winHeight = this.$scrollElement.height()
+      this.navHeight = $(".navigation").height()
 
-      const fromDroppable = ui.helper.data('droppable');
-      ui.helper.data('fromDroppable', fromDroppable);
-      this.$('.dragndropwi__widget').addClass('dragging');
-      this.$currentDraggable = ui.helper;
-      this.$currentDraggable.removeClass('ui-state-placed');
+      const fromDroppable = ui.helper.data("droppable")
+      ui.helper.data("fromDroppable", fromDroppable)
+      this.$(".dragndropwi__widget").addClass("dragging")
+      this.$currentDraggable = ui.helper
+      this.$currentDraggable.removeClass("ui-state-placed")
     },
 
     onDrag: function (e, ui) {
-      const top = ui.offset.top;
-      const st = this.$scrollElement.scrollTop();
-      const diff = st - top + this.navHeight;
+      const top = ui.offset.top
+      const st = this.$scrollElement.scrollTop()
+      const diff = st - top + this.navHeight
 
       if (diff > 0) {
-        this.dragScroll(-10, ui);
+        this.dragScroll(-10, ui)
       } else if (st + this.winHeight < top + 50) {
-        this.dragScroll(10, ui);
+        this.dragScroll(10, ui)
       } else if (this.isScrolling) {
-        this.cancelDragScroll();
+        this.cancelDragScroll()
       }
     },
 
     dragScroll: function (increment, ui) {
-      if (this.isScrolling) return;
-      this.isScrolling = true;
+      if (this.isScrolling) return
+      this.isScrolling = true
 
-      const $container = this.$(this.containerClass);
-      const containerTop = $container.offset().top;
-      const containerBottom = containerTop + $container.height();
+      const $container = this.$(this.containerClass)
+      const containerTop = $container.offset().top
+      const containerBottom = containerTop + $container.height()
 
       this.scrollInterval = setInterval(
         _.bind(function () {
-          const st = this.$scrollElement.scrollTop();
-          const top = ui.helper.offset().top;
+          const st = this.$scrollElement.scrollTop()
+          const top = ui.helper.offset().top
           if (increment > 0) {
             if (
               top >= containerBottom ||
               st + this.winHeight >= containerBottom
             ) {
-              this.cancelDragScroll();
+              this.cancelDragScroll()
             }
           } else {
             if (
               top <= containerTop - this.navHeight ||
               st <= containerTop - this.navHeight
             ) {
-              this.cancelDragScroll();
+              this.cancelDragScroll()
             }
           }
-          ui.helper.css({ top: '+=' + increment });
-          this.$scrollElement.scrollTop(st + increment);
+          ui.helper.css({ top: "+=" + increment })
+          this.$scrollElement.scrollTop(st + increment)
         }, this),
         32
-      );
+      )
     },
 
     cancelDragScroll: function () {
-      this.isScrolling = false;
-      clearInterval(this.scrollInterval);
+      this.isScrolling = false
+      clearInterval(this.scrollInterval)
     },
 
     onDragStop: function (e, ui) {
-      this.$('.dragndropwi__widget').removeClass('dragging');
-      this.$('.ui-state-hover').removeClass('ui-state-hover');
+      this.$(".dragndropwi__widget").removeClass("dragging")
+      this.$(".ui-state-hover").removeClass("ui-state-hover")
 
-      const fromDroppable = ui.helper.data('fromDroppable');
+      const fromDroppable = ui.helper.data("fromDroppable")
       if (fromDroppable && fromDroppable !== this.$currentDroppable) {
         fromDroppable
-          .removeClass('ui-state-disabled')
-          .removeClass('nomorespace')
-          .addClass('ui-state-enabled')
-          .removeData();
+          .removeClass("ui-state-disabled")
+          .removeClass("nomorespace")
+          .addClass("ui-state-enabled")
+          .removeData()
       }
 
       if (
         !this.$currentDroppable ||
-        this.$currentDroppable.is('.ui-state-disabled')
+        this.$currentDroppable.is(".ui-state-disabled")
       ) {
         // If we're not over a valid droppable, handle as a drag-out
         if (fromDroppable) {
-          this.onDragOut(e, ui);
+          this.onDragOut(e, ui)
         } else {
-          this.resetDraggable();
+          this.resetDraggable()
         }
-        return;
+        return
       }
 
       setTimeout(function () {
-        ui.helper.addClass('ui-draggable-dragging');
-      }, 2);
+        ui.helper.addClass("ui-draggable-dragging")
+      }, 2)
       setTimeout(function () {
-        ui.helper.removeClass('ui-draggable-dragging');
-      }, this.animationTime);
+        ui.helper.removeClass("ui-draggable-dragging")
+      }, this.animationTime)
 
-      const userAnswer = this.$currentDraggable.text();
-      this.$currentDroppable.data('userAnswer', userAnswer);
-      const $question = this.$currentDroppable.parents();
-      const $children = $question.children('.ui-droppable');
-      const questionIndex = $question.index();
-      const numAnswers = $children.length;
-      const item = this.model.get('_items')[questionIndex];
+      const userAnswer = this.$currentDraggable.text()
+      this.$currentDroppable.data("userAnswer", userAnswer)
+      const $question = this.$currentDroppable.parents()
+      const $children = $question.children(".ui-droppable")
+      const questionIndex = $question.index()
+      const numAnswers = $children.length
+      const item = this.model.get("_items")[questionIndex]
 
       if (numAnswers > 1) {
         item._userAnswer = _.map($children, function (droppable) {
-          return $(droppable).data('userAnswer');
-        });
+          return $(droppable).data("userAnswer")
+        })
       } else {
-        item._userAnswer = [userAnswer];
+        item._userAnswer = [userAnswer]
       }
 
-      this.placeDraggable(this.$currentDraggable, this.$currentDroppable, 200, questionIndex);
-      this.storeUserAnswer();
+      this.placeDraggable(
+        this.$currentDraggable,
+        this.$currentDroppable,
+        200,
+        questionIndex
+      )
+      this.storeUserAnswer()
 
       /*  */
-      const _userAnswer = this.model.get('_userAnswer');
-      const _userAnswerNum = _userAnswer.filter((item) => item !== -1).length;
-      const questions = this.model.get('_items');
+      const _userAnswer = this.model.get("_userAnswer")
+      const _userAnswerNum = _userAnswer.filter((item) => item !== -1).length
+      const questions = this.model.get("_items")
       const questionsAnsweredNum = questions.reduce((acc, item) => {
-        const acceptedAnswers = item.accepted.length || 0;
-        acc = acc + acceptedAnswers;
-        return acc;
-      }, 0);
+        const acceptedAnswers = item.accepted.length || 0
+        acc = acc + acceptedAnswers
+        return acc
+      }, 0)
       // console.log({
       //   _userAnswer,
       //   _userAnswerNum,
       //   questions,
       //   questionsAnsweredNum
       // });
-      this.renderCurrentAnswers(_userAnswerNum, questionsAnsweredNum);
+      this.renderCurrentAnswers(_userAnswerNum, questionsAnsweredNum)
     },
-    
+
     onDropOut: function (e, ui) {
-      $(e.target).removeClass('ui-state-hover');
-      const $droppable = this.$currentDraggable.data('droppable');
+      $(e.target).removeClass("ui-state-hover")
+      const $droppable = this.$currentDraggable.data("droppable")
       if ($droppable) {
         $droppable
-          .removeClass('ui-state-disabled')
-          .removeClass('nomorespace')
-          .addClass('ui-state-enabled');
-          
+          .removeClass("ui-state-disabled")
+          .removeClass("nomorespace")
+          .addClass("ui-state-enabled")
+
         // Get the question index and item
-        const questionIndex = $droppable.closest('.dragndropwi-question').attr('data-index');
-        const item = this.model.get('_items')[questionIndex];
-        
+        const questionIndex = $droppable
+          .closest(".dragndropwi-question")
+          .attr("data-index")
+        const item = this.model.get("_items")[questionIndex]
+
         // Get the answer being removed
-        const userAnswer = this.$currentDraggable.text();
-        
+        const userAnswer = this.$currentDraggable.text()
+
         // Remove this answer from the item's user answers
         if (item && item._userAnswer) {
-          item._userAnswer = item._userAnswer.filter(answer => answer !== userAnswer);
+          item._userAnswer = item._userAnswer.filter(
+            (answer) => answer !== userAnswer
+          )
         }
-        
+
         // Update the UI to reflect the removed answer
-        $droppable.closest('.dragndropwi-question').find(`.user-answer img[src="${userAnswer}"]`).remove();
-        
+        $droppable
+          .closest(".dragndropwi-question")
+          .find(`.user-answer img[src="${userAnswer}"]`)
+          .remove()
+
         // Update the user answer storage
-        this.storeUserAnswer();
-        
+        this.storeUserAnswer()
+
         // Update the answer count display
-        this.updateAnswerCount();
+        this.updateAnswerCount()
       }
 
       if (this.$currentDroppable && e.target === this.$currentDroppable[0]) {
-        this.$currentDraggable.data('droppable', null);
-        this.$currentDroppable = null;
+        this.$currentDraggable.data("droppable", null)
+        this.$currentDroppable = null
       }
     },
 
     onDropOver: function (e, ui) {
-      const $target = $(e.target);
-      if ($target.is('.ui-state-disabled')) return;
+      const $target = $(e.target)
+      if ($target.is(".ui-state-disabled")) return
       if (this.$currentDroppable) {
-        this.$currentDroppable.removeClass('ui-state-hover');
+        this.$currentDroppable.removeClass("ui-state-hover")
       }
-      $target.addClass('ui-state-hover');
-      this.$currentDroppable = $target;
+      $target.addClass("ui-state-hover")
+      this.$currentDroppable = $target
     },
 
-    placeDraggable: function ($draggable, $droppable, animationTime, i = null, isShowAnswer = false) {
-      if (typeof animationTime !== 'number') animationTime = this.animationTime;
-      const animationClass = 'dragndrop-transition-' + animationTime;
-      const items = this.model.get('_items');
-      const that = this;
+    placeDraggable: function (
+      $draggable,
+      $droppable,
+      animationTime,
+      i = null,
+      isShowAnswer = false
+    ) {
+      if (typeof animationTime !== "number") animationTime = this.animationTime
+      const animationClass = "dragndrop-transition-" + animationTime
+      const items = this.model.get("_items")
+      const that = this
 
       if (!isShowAnswer) {
-        this.$('.dragndropwi-question').find('.user-answer').remove();
+        this.$(".dragndropwi-question").find(".user-answer").remove()
         _.each(
-          this.$('.dragndropwi-question'),
+          this.$(".dragndropwi-question"),
           function (question, index) {
             const $container = $(
               '<div class="user-answer" style="padding:10px;position:absolute;top:50%;left:50%;width:100%;display:flex;gap:10px;flex-wrap:wrap;z-index:20;justify-content:center;align-items:center;transform:translate(-50%,-50%);"></div>'
-            );
-            const imageSources = items?.[parseInt(index)]?._userAnswer?.filter(item => !!item)?.reverse() || [];
+            )
+            const imageSources =
+              items?.[parseInt(index)]?._userAnswer
+                ?.filter((item) => !!item)
+                ?.reverse() || []
 
             imageSources.forEach((src) => {
-              const $img = $('<img />').attr('src', src);
+              const $img = $("<img />").attr("src", src)
 
-              $img.on('click', function() {
-                const $draggables = $('.ui-draggable');
-                const src = $(this).attr('src');
-                _.each($draggables, function(draggable) {
-                  const $draggable = $(draggable);
-                  const name = $draggable.attr('name');
-                  $(`img[src="${src}"`).remove();
-                  const $droppable = $draggable.data('droppable');
+              $img.on("click", function () {
+                const $draggables = $(".ui-draggable")
+                const src = $(this).attr("src")
+                _.each($draggables, function (draggable) {
+                  const $draggable = $(draggable)
+                  const name = $draggable.attr("name")
+                  $(`img[src="${src}"`).remove()
+                  const $droppable = $draggable.data("droppable")
 
                   if (name === src && $droppable) {
-                    that.resetDraggable($draggable);
-                    const item = items[parseInt(index)];
-                    console.log(item);
+                    that.resetDraggable($draggable)
+                    const item = items[parseInt(index)]
+                    console.log(item)
                     item._userAnswer = item._userAnswer.map((answer) => {
                       if (answer === src) {
-                        return undefined;
+                        return undefined
                       }
-                      return answer;
-                    });
-                    $droppable.removeClass('ui-state-disabled')
-                      .removeClass('nomorespace').removeData();
-
+                      return answer
+                    })
+                    $droppable
+                      .removeClass("ui-state-disabled")
+                      .removeClass("nomorespace")
+                      .removeData()
                   }
-                });
+                })
+              })
 
-              });
+              const $imgContainer = $("<div class='img-drag'></div>")
+              $imgContainer.append($img)
+              $container.append($imgContainer)
+            })
 
-              const $imgContainer = $(
-                "<div class='img-drag'></div>"
-              );
-              $imgContainer.append($img);
-              $container.append($imgContainer);
-            });
-
-            $(question).append($container);
+            $(question).append($container)
           },
           this
-        );
+        )
       }
 
-      $draggable.removeClass('ui-state-placed').addClass(animationClass);
+      $draggable.removeClass("ui-state-placed").addClass(animationClass)
       // .offset($droppable.offset())
 
       $droppable
-        .removeClass('ui-state-enabled')
-        .addClass('ui-state-disabled')
-        .data('answer', $draggable.text());
+        .removeClass("ui-state-enabled")
+        .addClass("ui-state-disabled")
+        .data("answer", $draggable.text())
 
       setTimeout(function () {
         $draggable
-          .toggleClass('ui-state-placed ' + animationClass)
-          .data('droppable', $droppable);
-      }, animationTime);
+          .toggleClass("ui-state-placed " + animationClass)
+          .data("droppable", $droppable)
+      }, animationTime)
 
       this.queue = setTimeout(function () {
-        that.$currentDroppable = null;
-      }, animationTime);
+        that.$currentDroppable = null
+      }, animationTime)
 
-      const component_id = this.model.get('_id');
+      const component_id = this.model.get("_id")
 
       _.each(items, function (item, i) {
         const uniqueitem = $(
@@ -551,15 +560,15 @@ define([
             '"] .dragndropwi__inner .dragndropwi-question[data-index="' +
             i +
             '"] .ui-state-disabled'
-        );
-        const uniqueitemnum = uniqueitem.length;
-        const accepted = item.accepted.length;
+        )
+        const uniqueitemnum = uniqueitem.length
+        const accepted = item.accepted.length
 
         if (uniqueitemnum == accepted) {
-          uniqueitem.addClass('nomorespace');
-          uniqueitem.last().css('opacity', '0.9');
+          uniqueitem.addClass("nomorespace")
+          uniqueitem.last().css("opacity", "0.9")
         }
-      });
+      })
 
       /// /////////////////// BOUNCE BACK BELOW HERE /////////////////////////////////////////
       // var bounceBack = this.model.get("_bounceBack");
@@ -570,13 +579,13 @@ define([
           '.dragndropwithimage[data-adapt-id="' +
             component_id +
             '"] .dragndropwi__inner .btn__container'
-        ).hasClass('bounceback')
+        ).hasClass("bounceback")
       ) {
-        const getindex = $droppable.attr('data-index');
+        const getindex = $droppable.attr("data-index")
         // console.log("GET INDEX: " + getindex);
 
-        const myitem0 = items[getindex].accepted[0].src;
-        const myuser0 = items[getindex]._userAnswer;
+        const myitem0 = items[getindex].accepted[0].src
+        const myuser0 = items[getindex]._userAnswer
         if (myuser0 == myitem0) {
           setTimeout(function () {
             $(
@@ -585,14 +594,14 @@ define([
                 '"] .dragndropwi__inner .dragndropwi-question[data-index="' +
                 getindex +
                 '"]'
-            ).addClass('correct');
+            ).addClass("correct")
             $(
               '.dragndropwithimage[data-adapt-id="' +
                 component_id +
                 '"] .dragndropwi__inner .dragndropwi-answer[name="' +
                 myuser0 +
                 '"]'
-            ).remove();
+            ).remove()
             $(
               '.dragndropwithimage[data-adapt-id="' +
                 component_id +
@@ -601,9 +610,9 @@ define([
                 '"] .ui-state-disabled[data-index="' +
                 getindex +
                 '"]'
-            ).removeAttr('data-index');
-          }, animationTime);
-          this.popupCorrect();
+            ).removeAttr("data-index")
+          }, animationTime)
+          this.popupCorrect()
         } else {
           setTimeout(function () {
             $(
@@ -613,9 +622,9 @@ define([
                 getindex +
                 '"] .dragndropwi-droppable'
             )
-              .removeClass('ui-state-disabled')
-              .removeClass('nomorespace')
-              .addClass('ui-state-enabled');
+              .removeClass("ui-state-disabled")
+              .removeClass("nomorespace")
+              .addClass("ui-state-enabled")
             $(
               '.dragndropwithimage[data-adapt-id="' +
                 component_id +
@@ -624,10 +633,10 @@ define([
                 '"]'
             )
               .animate($draggable.data().originalPosition, animationTime)
-              .removeClass('ui-state-placed')
-              .data('droppable', null);
-          }, animationTime);
-          this.popupIncorrect();
+              .removeClass("ui-state-placed")
+              .data("droppable", null)
+          }, animationTime)
+          this.popupIncorrect()
         }
       } else {
         // No BounceBack
@@ -637,93 +646,91 @@ define([
     },
 
     popupCorrect: function () {
-      this.model.set('_active', false);
-      const countenabled = this.$('.ui-state-enabled').length;
-      const bodyText = this.model.get('_feedback').correct;
-      const titleText = this.model.get('title');
+      this.model.set("_active", false)
+      const countenabled = this.$(".ui-state-enabled").length
+      const bodyText = this.model.get("_feedback").correct
+      const titleText = this.model.get("title")
 
       const popupObject = {
         title: titleText,
-        body: bodyText
-      };
-      Adapt.notify.popup(popupObject);
+        body: bodyText,
+      }
+      Adapt.notify.popup(popupObject)
 
       if (countenabled === 0) {
-        this.setCompletionStatus();
+        this.setCompletionStatus()
       }
     },
     popupIncorrect: function () {
-      this.model.set('_active', false);
-      const bodyText2 = this.model.get('_feedback')._incorrect.notFinal;
-      const titleText2 = this.model.get('title');
+      this.model.set("_active", false)
+      const bodyText2 = this.model.get("_feedback")._incorrect.notFinal
+      const titleText2 = this.model.get("title")
 
       const popupObject2 = {
         title: titleText2,
-        body: bodyText2
-      };
-      Adapt.notify.popup(popupObject2);
+        body: bodyText2,
+      }
+      Adapt.notify.popup(popupObject2)
     },
 
     resetDraggable: function ($draggable, position, animationTime) {
-      $draggable = $draggable || this.$currentDraggable;
-      position = position || $draggable.data().originalPosition;
-      if (animationTime === undefined) animationTime = this.animationTime;
-      if ($draggable.data('droppable')) {
-        $draggable.data('droppable').addClass('ui-state-enabled');
+      $draggable = $draggable || this.$currentDraggable
+      position = position || $draggable.data().originalPosition
+      if (animationTime === undefined) animationTime = this.animationTime
+      if ($draggable.data("droppable")) {
+        $draggable.data("droppable").addClass("ui-state-enabled")
       }
 
       $draggable
         .animate(position, animationTime)
-        .removeClass('ui-state-placed')
-        .data('droppable', null).css({
-          transform: 'unset'
-        });
+        .removeClass("ui-state-placed")
+        .data("droppable", null)
+        .css({
+          transform: "unset",
+        })
     },
 
     /** ************************************ QUESTION METHODS **************************************/
 
     canSubmit: function () {
-      return this.$('.ui-state-enabled').length === 0;
+      return this.$(".ui-state-enabled").length === 0
     },
 
     showMarking: function () {
       _.each(
-        this.model.get('_items'),
+        this.model.get("_items"),
         function (item, i) {
-          const $question = this.$('.dragndropwi-question').eq(i);
+          const $question = this.$(".dragndropwi-question").eq(i)
           $question
-            .removeClass('correct incorrect')
-            .addClass(item._isCorrect ? 'correct' : 'incorrect');
+            .removeClass("correct incorrect")
+            .addClass(item._isCorrect ? "correct" : "incorrect")
         },
         this
-      );
+      )
     },
 
     isCorrect: function () {
-      this.markAnswers();
+      this.markAnswers()
 
       // do we have any _isCorrect == false?
-      return !_.contains(
-        _.pluck(this.model.get('_items'), '_isCorrect'),
-        false
-      );
+      return !_.contains(_.pluck(this.model.get("_items"), "_isCorrect"), false)
     },
 
     markAnswers: function () {
-      let numberOfCorrectAnswers = 0;
-      const myownid = this.model.get('_id');
-      this.model.set('_isAtLeastOneCorrectSelection', false);
+      let numberOfCorrectAnswers = 0
+      const myownid = this.model.get("_id")
+      this.model.set("_isAtLeastOneCorrectSelection", false)
       _.each(
-        this.model.get('_items'),
+        this.model.get("_items"),
         function (item) {
-          let answers = [];
+          let answers = []
 
           _.each(
             item.accepted,
             function (mraccepted) {
-              const checkaccepted = mraccepted.src;
+              const checkaccepted = mraccepted.src
 
-              answers = answers.concat(checkaccepted); // Combines multiple answers?
+              answers = answers.concat(checkaccepted) // Combines multiple answers?
 
               $(
                 '.dragndropwithimage[data-adapt-id="' +
@@ -732,48 +739,48 @@ define([
                   checkaccepted +
                   '"]'
               )
-                .addClass('dragcharm')
-                .text('For \n' + item.text);
+                .addClass("dragcharm")
+                .text("For \n" + item.text)
 
               item._isCorrect =
-                answers.sort().join() === item._userAnswer.sort().join();
+                answers.sort().join() === item._userAnswer.sort().join()
 
               if (item._isCorrect) {
-                numberOfCorrectAnswers++;
+                numberOfCorrectAnswers++
                 this.model.set(
-                  '_numberOfCorrectAnswers',
+                  "_numberOfCorrectAnswers",
                   numberOfCorrectAnswers
-                );
-                this.model.set('_isAtLeastOneCorrectSelection', true);
+                )
+                this.model.set("_isAtLeastOneCorrectSelection", true)
               }
             },
             this
-          );
+          )
         },
         this
-      );
+      )
     },
 
     resetQuestion: function () {
-      this.$('.dragndropwi-question').removeClass('correct incorrect');
-      this.$('.ui-droppable')
-        .removeClass('ui-state-disabled')
-        .removeClass('nomorespace');
-      const myownid = this.model.get('_id');
+      this.$(".dragndropwi-question").removeClass("correct incorrect")
+      this.$(".ui-droppable")
+        .removeClass("ui-state-disabled")
+        .removeClass("nomorespace")
+      const myownid = this.model.get("_id")
 
       _.each(
-        this.$('.ui-state-placed'),
+        this.$(".ui-state-placed"),
         function (draggable) {
-          this.resetDraggable($(draggable));
+          this.resetDraggable($(draggable))
         },
         this
-      );
+      )
 
-      _.each(this.model.get('_items'), function (item, i) {
-        item._isCorrect = false;
+      _.each(this.model.get("_items"), function (item, i) {
+        item._isCorrect = false
 
         _.each(item.accepted, function (mraccepted) {
-          const accepted = mraccepted.src;
+          const accepted = mraccepted.src
 
           $(
             '.dragndropwithimage[data-adapt-id="' +
@@ -782,217 +789,217 @@ define([
               accepted +
               '"]'
           )
-            .removeClass('dragcharm')
-            .text(accepted);
-        });
-      });
+            .removeClass("dragcharm")
+            .text(accepted)
+        })
+      })
       // Re-disable submit button after reset using existing method
-      this.disableButtonActions(true);
+      this.disableButtonActions(true)
     },
 
     hideCorrectAnswer: function () {
-      this.showAnswer(true);
+      this.showAnswer(true)
     },
 
     showCorrectAnswer: function () {
-      this.showAnswer();
+      this.showAnswer()
     },
 
     disableButtonActions: function (val) {
-      this.$('.btn__action').prop('disabled', val);
+      this.$(".btn__action").prop("disabled", val)
     },
 
     showAnswer: function (showUserAnswer) {
-      const $droppables = this.$('.ui-droppable');
-      const context = this;
-      this.disableButtonActions(true);
+      const $droppables = this.$(".ui-droppable")
+      const context = this
+      this.disableButtonActions(true)
 
-      if (!$droppables.length) return; // Necessary as method is automatically called before drag and drop elements are rendered
+      if (!$droppables.length) return // Necessary as method is automatically called before drag and drop elements are rendered
       setTimeout(function () {
-        context.disableButtonActions(false);
-      }, this.model.get('animationTime') || 300);
+        context.disableButtonActions(false)
+      }, this.model.get("animationTime") || 300)
 
-      if (!$droppables.length) return; // Necessary as method is automatically called before drag and drop elements are rendered
-      const items = this.model.get('_items');
-      const countdummy = this.model.get('dummyAnswers').length;
-      console.log(items, this.model.get('dummyAnswers'));
+      if (!$droppables.length) return // Necessary as method is automatically called before drag and drop elements are rendered
+      const items = this.model.get("_items")
+      const countdummy = this.model.get("dummyAnswers").length
+      console.log(items, this.model.get("dummyAnswers"))
 
       if (countdummy == 1) {
-        var dummyAnswers0 = this.model.get('dummyAnswers')[0].src || [];
+        var dummyAnswers0 = this.model.get("dummyAnswers")[0].src || []
       } else if (countdummy == 2) {
-        var dummyAnswers0 = this.model.get('dummyAnswers')[0].src || [];
-        var dummyAnswers1 = this.model.get('dummyAnswers')[1].src || [];
+        var dummyAnswers0 = this.model.get("dummyAnswers")[0].src || []
+        var dummyAnswers1 = this.model.get("dummyAnswers")[1].src || []
       } else if (countdummy == 3) {
-        var dummyAnswers0 = this.model.get('dummyAnswers')[0].src || [];
-        var dummyAnswers1 = this.model.get('dummyAnswers')[1].src || [];
-        var dummyAnswers2 = this.model.get('dummyAnswers')[2].src || [];
+        var dummyAnswers0 = this.model.get("dummyAnswers")[0].src || []
+        var dummyAnswers1 = this.model.get("dummyAnswers")[1].src || []
+        var dummyAnswers2 = this.model.get("dummyAnswers")[2].src || []
       } else if (countdummy == 4) {
-        var dummyAnswers0 = this.model.get('dummyAnswers')[0].src || [];
-        var dummyAnswers1 = this.model.get('dummyAnswers')[1].src || [];
-        var dummyAnswers2 = this.model.get('dummyAnswers')[2].src || [];
-        var dummyAnswers3 = this.model.get('dummyAnswers')[3].src || [];
+        var dummyAnswers0 = this.model.get("dummyAnswers")[0].src || []
+        var dummyAnswers1 = this.model.get("dummyAnswers")[1].src || []
+        var dummyAnswers2 = this.model.get("dummyAnswers")[2].src || []
+        var dummyAnswers3 = this.model.get("dummyAnswers")[3].src || []
       } else if (countdummy == 5) {
-        var dummyAnswers0 = this.model.get('dummyAnswers')[0].src || [];
-        var dummyAnswers1 = this.model.get('dummyAnswers')[1].src || [];
-        var dummyAnswers2 = this.model.get('dummyAnswers')[2].src || [];
-        var dummyAnswers3 = this.model.get('dummyAnswers')[3].src || [];
-        var dummyAnswers4 = this.model.get('dummyAnswers')[4].src || [];
+        var dummyAnswers0 = this.model.get("dummyAnswers")[0].src || []
+        var dummyAnswers1 = this.model.get("dummyAnswers")[1].src || []
+        var dummyAnswers2 = this.model.get("dummyAnswers")[2].src || []
+        var dummyAnswers3 = this.model.get("dummyAnswers")[3].src || []
+        var dummyAnswers4 = this.model.get("dummyAnswers")[4].src || []
       } else if (countdummy == 6) {
-        var dummyAnswers0 = this.model.get('dummyAnswers')[0].src || [];
-        var dummyAnswers1 = this.model.get('dummyAnswers')[1].src || [];
-        var dummyAnswers2 = this.model.get('dummyAnswers')[2].src || [];
-        var dummyAnswers3 = this.model.get('dummyAnswers')[3].src || [];
-        var dummyAnswers4 = this.model.get('dummyAnswers')[4].src || [];
-        var dummyAnswers5 = this.model.get('dummyAnswers')[5].src || [];
+        var dummyAnswers0 = this.model.get("dummyAnswers")[0].src || []
+        var dummyAnswers1 = this.model.get("dummyAnswers")[1].src || []
+        var dummyAnswers2 = this.model.get("dummyAnswers")[2].src || []
+        var dummyAnswers3 = this.model.get("dummyAnswers")[3].src || []
+        var dummyAnswers4 = this.model.get("dummyAnswers")[4].src || []
+        var dummyAnswers5 = this.model.get("dummyAnswers")[5].src || []
       } else if (countdummy == 7) {
-        var dummyAnswers0 = this.model.get('dummyAnswers')[0].src || [];
-        var dummyAnswers1 = this.model.get('dummyAnswers')[1].src || [];
-        var dummyAnswers2 = this.model.get('dummyAnswers')[2].src || [];
-        var dummyAnswers3 = this.model.get('dummyAnswers')[3].src || [];
-        var dummyAnswers4 = this.model.get('dummyAnswers')[4].src || [];
-        var dummyAnswers5 = this.model.get('dummyAnswers')[5].src || [];
-        var dummyAnswers6 = this.model.get('dummyAnswers')[6].src || [];
+        var dummyAnswers0 = this.model.get("dummyAnswers")[0].src || []
+        var dummyAnswers1 = this.model.get("dummyAnswers")[1].src || []
+        var dummyAnswers2 = this.model.get("dummyAnswers")[2].src || []
+        var dummyAnswers3 = this.model.get("dummyAnswers")[3].src || []
+        var dummyAnswers4 = this.model.get("dummyAnswers")[4].src || []
+        var dummyAnswers5 = this.model.get("dummyAnswers")[5].src || []
+        var dummyAnswers6 = this.model.get("dummyAnswers")[6].src || []
       } else if (countdummy == 8) {
-        var dummyAnswers0 = this.model.get('dummyAnswers')[0].src || [];
-        var dummyAnswers1 = this.model.get('dummyAnswers')[1].src || [];
-        var dummyAnswers2 = this.model.get('dummyAnswers')[2].src || [];
-        var dummyAnswers3 = this.model.get('dummyAnswers')[3].src || [];
-        var dummyAnswers4 = this.model.get('dummyAnswers')[4].src || [];
-        var dummyAnswers5 = this.model.get('dummyAnswers')[5].src || [];
-        var dummyAnswers6 = this.model.get('dummyAnswers')[6].src || [];
-        var dummyAnswers7 = this.model.get('dummyAnswers')[7].src || [];
+        var dummyAnswers0 = this.model.get("dummyAnswers")[0].src || []
+        var dummyAnswers1 = this.model.get("dummyAnswers")[1].src || []
+        var dummyAnswers2 = this.model.get("dummyAnswers")[2].src || []
+        var dummyAnswers3 = this.model.get("dummyAnswers")[3].src || []
+        var dummyAnswers4 = this.model.get("dummyAnswers")[4].src || []
+        var dummyAnswers5 = this.model.get("dummyAnswers")[5].src || []
+        var dummyAnswers6 = this.model.get("dummyAnswers")[6].src || []
+        var dummyAnswers7 = this.model.get("dummyAnswers")[7].src || []
       } else if (countdummy == 9) {
-        var dummyAnswers0 = this.model.get('dummyAnswers')[0].src || [];
-        var dummyAnswers1 = this.model.get('dummyAnswers')[1].src || [];
-        var dummyAnswers2 = this.model.get('dummyAnswers')[2].src || [];
-        var dummyAnswers3 = this.model.get('dummyAnswers')[3].src || [];
-        var dummyAnswers4 = this.model.get('dummyAnswers')[4].src || [];
-        var dummyAnswers5 = this.model.get('dummyAnswers')[5].src || [];
-        var dummyAnswers6 = this.model.get('dummyAnswers')[6].src || [];
-        var dummyAnswers7 = this.model.get('dummyAnswers')[7].src || [];
-        var dummyAnswers8 = this.model.get('dummyAnswers')[8].src || [];
+        var dummyAnswers0 = this.model.get("dummyAnswers")[0].src || []
+        var dummyAnswers1 = this.model.get("dummyAnswers")[1].src || []
+        var dummyAnswers2 = this.model.get("dummyAnswers")[2].src || []
+        var dummyAnswers3 = this.model.get("dummyAnswers")[3].src || []
+        var dummyAnswers4 = this.model.get("dummyAnswers")[4].src || []
+        var dummyAnswers5 = this.model.get("dummyAnswers")[5].src || []
+        var dummyAnswers6 = this.model.get("dummyAnswers")[6].src || []
+        var dummyAnswers7 = this.model.get("dummyAnswers")[7].src || []
+        var dummyAnswers8 = this.model.get("dummyAnswers")[8].src || []
       } else if (countdummy == 10) {
-        var dummyAnswers0 = this.model.get('dummyAnswers')[0].src || [];
-        var dummyAnswers1 = this.model.get('dummyAnswers')[1].src || [];
-        var dummyAnswers2 = this.model.get('dummyAnswers')[2].src || [];
-        var dummyAnswers3 = this.model.get('dummyAnswers')[3].src || [];
-        var dummyAnswers4 = this.model.get('dummyAnswers')[4].src || [];
-        var dummyAnswers5 = this.model.get('dummyAnswers')[5].src || [];
-        var dummyAnswers6 = this.model.get('dummyAnswers')[6].src || [];
-        var dummyAnswers7 = this.model.get('dummyAnswers')[7].src || [];
-        var dummyAnswers8 = this.model.get('dummyAnswers')[8].src || [];
-        var dummyAnswers9 = this.model.get('dummyAnswers')[9].src || [];
+        var dummyAnswers0 = this.model.get("dummyAnswers")[0].src || []
+        var dummyAnswers1 = this.model.get("dummyAnswers")[1].src || []
+        var dummyAnswers2 = this.model.get("dummyAnswers")[2].src || []
+        var dummyAnswers3 = this.model.get("dummyAnswers")[3].src || []
+        var dummyAnswers4 = this.model.get("dummyAnswers")[4].src || []
+        var dummyAnswers5 = this.model.get("dummyAnswers")[5].src || []
+        var dummyAnswers6 = this.model.get("dummyAnswers")[6].src || []
+        var dummyAnswers7 = this.model.get("dummyAnswers")[7].src || []
+        var dummyAnswers8 = this.model.get("dummyAnswers")[8].src || []
+        var dummyAnswers9 = this.model.get("dummyAnswers")[9].src || []
       }
 
-      const userAnswers = _.flatten(_.pluck(items, '_userAnswer'));
-      const usedDroppables = [];
-      const toReset = [];
-      const toPlace = [];
-      const toMove = [];
+      const userAnswers = _.flatten(_.pluck(items, "_userAnswer"))
+      const usedDroppables = []
+      const toReset = []
+      const toPlace = []
+      const toMove = []
 
       _.each(
         items,
         function (item, i) {
-          const $question = this.$('.dragndropwi-question').eq(i);
-          let answers = [];
+          const $question = this.$(".dragndropwi-question").eq(i)
+          let answers = []
 
           _.each(
             item.accepted,
             function (mraccepted) {
-              const checkaccepted = mraccepted.src;
+              const checkaccepted = mraccepted.src
 
-              answers = answers.concat(checkaccepted); // Combines multiple answers?
+              answers = answers.concat(checkaccepted) // Combines multiple answers?
 
-              answers.sort();
-              item._userAnswer.sort();
+              answers.sort()
+              item._userAnswer.sort()
 
               if (item._userAnswer.join() !== answers.join()) {
-                const itemUserAnswers = _.difference(item._userAnswer, answers);
-                const acceptedAnswers = _.difference(answers, item._userAnswer);
+                const itemUserAnswers = _.difference(item._userAnswer, answers)
+                const acceptedAnswers = _.difference(answers, item._userAnswer)
 
-                const difference = userAnswers.concat(acceptedAnswers);
+                const difference = userAnswers.concat(acceptedAnswers)
 
                 _.each(
                   itemUserAnswers,
                   function (userAnswer, j) {
                     const answerPlace = showUserAnswer
                       ? userAnswer
-                      : acceptedAnswers[j];
+                      : acceptedAnswers[j]
                     const answerReset = showUserAnswer
                       ? acceptedAnswers[j]
-                      : userAnswer;
+                      : userAnswer
 
                     const droppable = _.find(
-                      $question.children('.ui-droppable'),
+                      $question.children(".ui-droppable"),
                       function (droppable) {
-                        const answer = $(droppable).data().answer;
+                        const answer = $(droppable).data().answer
                         if (usedDroppables.indexOf(droppable) > -1) {
-                          return false;
+                          return false
                         }
-                        usedDroppables.push(droppable);
+                        usedDroppables.push(droppable)
                         return (
                           (!showUserAnswer && answers.indexOf(answer) === -1) ||
                           (showUserAnswer &&
                             item._userAnswer.indexOf(answer) === -1)
-                        );
+                        )
                       }
-                    );
-                    const $droppable = $(droppable);
-                    placeDraggables(answerPlace, answerReset, $droppable, this);
+                    )
+                    const $droppable = $(droppable)
+                    placeDraggables(answerPlace, answerReset, $droppable, this)
                   },
                   this
-                );
+                )
               }
             },
             this
-          );
+          )
         },
         this
-      );
+      )
 
-      const draggables = toReset.concat(toMove, toPlace);
+      const draggables = toReset.concat(toMove, toPlace)
 
       _.each(
         draggables,
         function ($, i) {
-          const delay = this.animationDelay;
-          const t = i * delay;
-          const that = this;
+          const delay = this.animationDelay
+          const t = i * delay
+          const that = this
           setTimeout(function () {
             $.drop
               ? that.placeDraggable($.drag, $.drop, 600, i, true)
-              : that.resetDraggable($.drag, null, 600);
-          }, t);
+              : that.resetDraggable($.drag, null, 600)
+          }, t)
         },
         this
-      );
+      )
 
       function placeDraggables(answerPlace, answerReset, $droppable, instance) {
-        const $draggablePlace = instance.getDraggableByText(answerPlace);
-        const $draggableReset = instance.getDraggableByText(answerReset);
+        const $draggablePlace = instance.getDraggableByText(answerPlace)
+        const $draggableReset = instance.getDraggableByText(answerReset)
 
         if (countdummy == 1) {
           var isReset =
             (showUserAnswer && userAnswers.indexOf(answerReset) === -1) ||
-            (!showUserAnswer && dummyAnswers0.indexOf(answerReset) > -1);
+            (!showUserAnswer && dummyAnswers0.indexOf(answerReset) > -1)
         } else if (countdummy == 2) {
           var isReset =
             (showUserAnswer && userAnswers.indexOf(answerReset) === -1) ||
             (!showUserAnswer && dummyAnswers0.indexOf(answerReset) > -1) ||
-            (!showUserAnswer && dummyAnswers1.indexOf(answerReset) > -1);
+            (!showUserAnswer && dummyAnswers1.indexOf(answerReset) > -1)
         } else if (countdummy == 3) {
           var isReset =
             (showUserAnswer && userAnswers.indexOf(answerReset) === -1) ||
             (!showUserAnswer && dummyAnswers0.indexOf(answerReset) > -1) ||
             (!showUserAnswer && dummyAnswers1.indexOf(answerReset) > -1) ||
-            (!showUserAnswer && dummyAnswers2.indexOf(answerReset) > -1);
+            (!showUserAnswer && dummyAnswers2.indexOf(answerReset) > -1)
         } else if (countdummy == 4) {
           var isReset =
             (showUserAnswer && userAnswers.indexOf(answerReset) === -1) ||
             (!showUserAnswer && dummyAnswers0.indexOf(answerReset) > -1) ||
             (!showUserAnswer && dummyAnswers1.indexOf(answerReset) > -1) ||
             (!showUserAnswer && dummyAnswers2.indexOf(answerReset) > -1) ||
-            (!showUserAnswer && dummyAnswers3.indexOf(answerReset) > -1);
+            (!showUserAnswer && dummyAnswers3.indexOf(answerReset) > -1)
         } else if (countdummy == 5) {
           var isReset =
             (showUserAnswer && userAnswers.indexOf(answerReset) === -1) ||
@@ -1000,7 +1007,7 @@ define([
             (!showUserAnswer && dummyAnswers1.indexOf(answerReset) > -1) ||
             (!showUserAnswer && dummyAnswers2.indexOf(answerReset) > -1) ||
             (!showUserAnswer && dummyAnswers3.indexOf(answerReset) > -1) ||
-            (!showUserAnswer && dummyAnswers4.indexOf(answerReset) > -1);
+            (!showUserAnswer && dummyAnswers4.indexOf(answerReset) > -1)
         } else if (countdummy == 6) {
           var isReset =
             (showUserAnswer && userAnswers.indexOf(answerReset) === -1) ||
@@ -1009,7 +1016,7 @@ define([
             (!showUserAnswer && dummyAnswers2.indexOf(answerReset) > -1) ||
             (!showUserAnswer && dummyAnswers3.indexOf(answerReset) > -1) ||
             (!showUserAnswer && dummyAnswers4.indexOf(answerReset) > -1) ||
-            (!showUserAnswer && dummyAnswers5.indexOf(answerReset) > -1);
+            (!showUserAnswer && dummyAnswers5.indexOf(answerReset) > -1)
         } else if (countdummy == 7) {
           var isReset =
             (showUserAnswer && userAnswers.indexOf(answerReset) === -1) ||
@@ -1019,7 +1026,7 @@ define([
             (!showUserAnswer && dummyAnswers3.indexOf(answerReset) > -1) ||
             (!showUserAnswer && dummyAnswers4.indexOf(answerReset) > -1) ||
             (!showUserAnswer && dummyAnswers5.indexOf(answerReset) > -1) ||
-            (!showUserAnswer && dummyAnswers6.indexOf(answerReset) > -1);
+            (!showUserAnswer && dummyAnswers6.indexOf(answerReset) > -1)
         } else if (countdummy == 8) {
           var isReset =
             (showUserAnswer && userAnswers.indexOf(answerReset) === -1) ||
@@ -1030,7 +1037,7 @@ define([
             (!showUserAnswer && dummyAnswers4.indexOf(answerReset) > -1) ||
             (!showUserAnswer && dummyAnswers5.indexOf(answerReset) > -1) ||
             (!showUserAnswer && dummyAnswers6.indexOf(answerReset) > -1) ||
-            (!showUserAnswer && dummyAnswers7.indexOf(answerReset) > -1);
+            (!showUserAnswer && dummyAnswers7.indexOf(answerReset) > -1)
         } else if (countdummy == 9) {
           var isReset =
             (showUserAnswer && userAnswers.indexOf(answerReset) === -1) ||
@@ -1042,7 +1049,7 @@ define([
             (!showUserAnswer && dummyAnswers5.indexOf(answerReset) > -1) ||
             (!showUserAnswer && dummyAnswers6.indexOf(answerReset) > -1) ||
             (!showUserAnswer && dummyAnswers7.indexOf(answerReset) > -1) ||
-            (!showUserAnswer && dummyAnswers8.indexOf(answerReset) > -1);
+            (!showUserAnswer && dummyAnswers8.indexOf(answerReset) > -1)
         } else if (countdummy == 10) {
           var isReset =
             (showUserAnswer && userAnswers.indexOf(answerReset) === -1) ||
@@ -1055,161 +1062,172 @@ define([
             (!showUserAnswer && dummyAnswers6.indexOf(answerReset) > -1) ||
             (!showUserAnswer && dummyAnswers7.indexOf(answerReset) > -1) ||
             (!showUserAnswer && dummyAnswers8.indexOf(answerReset) > -1) ||
-            (!showUserAnswer && dummyAnswers9.indexOf(answerReset) > -1);
+            (!showUserAnswer && dummyAnswers9.indexOf(answerReset) > -1)
         }
 
-        $draggablePlace.hasClass('ui-state-placed')
+        $draggablePlace.hasClass("ui-state-placed")
           ? toMove.push({ drag: $draggablePlace, drop: $droppable })
-          : toPlace.push({ drag: $draggablePlace, drop: $droppable });
-        if (isReset) toReset.push({ drag: $draggableReset });
+          : toPlace.push({ drag: $draggablePlace, drop: $droppable })
+        if (isReset) toReset.push({ drag: $draggableReset })
       }
 
       if (!showUserAnswer) {
         _.each(
-          this.$('.dragndropwi-question'),
+          this.$(".dragndropwi-question"),
           function (question, index) {
             const $container = $(
               '<div class="accepted-answer" style="padding: 10px; display: block; position: absolute;align-items:center;justify-content:center; top: 50%; left: 50%; width: 100%; display: flex; gap: 10px; flex-wrap: wrap;;transform:translate(-50%,-50%);"></div>'
-            );
+            )
             const imageSources = items[parseInt(index)].accepted.map(
               (item) => item.src
-            );
+            )
 
             imageSources.forEach((src, index) => {
-              const $img = $('<img />').attr('src', src);
+              const $img = $("<img />").attr("src", src)
 
-              const $imgContainer = $(
-                "<div class='img-drag'></div>"
-              );
-              $imgContainer.append($img);
-              $container.append($imgContainer);
-            });
+              const $imgContainer = $("<div class='img-drag'></div>")
+              $imgContainer.append($img)
+              $container.append($imgContainer)
+            })
 
-            $(question).append($container);
+            $(question).append($container)
           },
           this
-        );
-        this.$('.dragndropwi-answers').css('visibility', 'hidden');
-        this.$('.dragndropwi-question').find('.user-answer').css({ visibility: 'hidden' });
+        )
+        this.$(".dragndropwi-answers").css("visibility", "hidden")
+        this.$(".dragndropwi-question")
+          .find(".user-answer")
+          .css({ visibility: "hidden" })
       } else {
         _.each(
-          this.$('.dragndropwi-question'),
+          this.$(".dragndropwi-question"),
           function (question, index) {
-            $(question).find('.accepted-answer').remove();
+            $(question).find(".accepted-answer").remove()
           },
           this
-        );
+        )
 
-        this.$('.dragndropwi-answers').css('visibility', 'visible');
+        this.$(".dragndropwi-answers").css("visibility", "visible")
         _.each(
-          this.$('.dragndropwi-answers').find('.dragndropwi-item'),
-          function(item, index) {
-
+          this.$(".dragndropwi-answers").find(".dragndropwi-item"),
+          function (item, index) {
             if (userAnswers.includes($(item).html())) {
-              $(item).css('visibility', 'hidden');
+              $(item).css("visibility", "hidden")
             }
-          }, this
-        );
-        this.$('.dragndropwi-question').find('.user-answer').css({ visibility: 'visible' });
+          },
+          this
+        )
+        this.$(".dragndropwi-question")
+          .find(".user-answer")
+          .css({ visibility: "visible" })
       }
     },
 
     storeUserAnswer: function () {
-      const answers = this.getAnswers(true);
-      const $droppables = this.$('.ui-droppable');
+      const answers = this.getAnswers(true)
+      const $droppables = this.$(".ui-droppable")
       const userAnswers = _.map($droppables, function (droppable, i) {
-        const answer = $droppables.eq(i).data('userAnswer');
-        return answers.indexOf(answer);
-      });
+        const answer = $droppables.eq(i).data("userAnswer")
+        return answers.indexOf(answer)
+      })
 
-      this.model.set('_userAnswer', userAnswers);
+      this.model.set("_userAnswer", userAnswers)
     },
 
     setScore: function () {
-      this.$('.dragndropwi-question').find('.user-answer').css('pointer-events', 'none');
+      this.$(".dragndropwi-question")
+        .find(".user-answer")
+        .css("pointer-events", "none")
       const numberOfCorrectAnswers =
-        this.model.get('_numberOfCorrectAnswers') || 0;
-      const questionWeight = this.model.get('_questionWeight');
-      const itemLength = this.model.get('_items').length;
-      const items = this.model.get('_items');
+        this.model.get("_numberOfCorrectAnswers") || 0
+      const questionWeight = this.model.get("_questionWeight")
+      const itemLength = this.model.get("_items").length
+      const items = this.model.get("_items")
 
-      const score = (questionWeight * numberOfCorrectAnswers) / itemLength;
+      const score = (questionWeight * numberOfCorrectAnswers) / itemLength
 
-      let _score = 0;
-      let _maxScore = 0;
+      let _score = 0
+      let _maxScore = 0
 
       items.forEach((item) => {
-        const { accepted, _userAnswer } = item;
-        const _acceptedSrc = accepted.map((item) => item.src);
+        const { accepted, _userAnswer } = item
+        const _acceptedSrc = accepted.map((item) => item.src)
 
-        _score += _.intersection(_acceptedSrc, _userAnswer).length;
-        _maxScore += _acceptedSrc.length;
-      });
+        _score += _.intersection(_acceptedSrc, _userAnswer).length
+        _maxScore += _acceptedSrc.length
+      })
 
-      this.model.set('_score', {
+      this.model.set("_score", {
         score: _score,
         maxScore: _maxScore,
-        scaled : _score / _maxScore
-      });
-      this.renderScore(_score, _maxScore);
+        scaled: _score / _maxScore,
+      })
+      this.renderScore(_score, _maxScore)
     },
 
     disableQuestion: function () {
-      this.$('.dragndropwi-answers').children().draggable('disable');
+      this.$(".dragndropwi-answers").children().draggable("disable")
     },
 
     enableQuestion: function () {
-      this.$('.dragndropwi-answers').children().draggable('enable');
+      this.$(".dragndropwi-answers").children().draggable("enable")
     },
 
     onDragOut: function (e, ui) {
       // This method can be called from onDragStop when a draggable is not over any droppable
       if (!this.$currentDroppable) {
-        const $draggable = $(e.target);
-        const fromDroppable = $draggable.data('fromDroppable');
-        
+        const $draggable = $(e.target)
+        const fromDroppable = $draggable.data("fromDroppable")
+
         if (fromDroppable) {
           // Get the question index and item
-          const questionIndex = fromDroppable.closest('.dragndropwi-question').attr('data-index');
-          const item = this.model.get('_items')[questionIndex];
-          
+          const questionIndex = fromDroppable
+            .closest(".dragndropwi-question")
+            .attr("data-index")
+          const item = this.model.get("_items")[questionIndex]
+
           // Get the answer being removed
-          const userAnswer = $draggable.text();
-          
+          const userAnswer = $draggable.text()
+
           // Remove this answer from the item's user answers
           if (item && item._userAnswer) {
-            item._userAnswer = item._userAnswer.filter(answer => answer !== userAnswer);
+            item._userAnswer = item._userAnswer.filter(
+              (answer) => answer !== userAnswer
+            )
           }
-          
+
           // Update the UI
-          fromDroppable.closest('.dragndropwi-question').find(`.user-answer img[src="${userAnswer}"]`).remove();
-          
+          fromDroppable
+            .closest(".dragndropwi-question")
+            .find(`.user-answer img[src="${userAnswer}"]`)
+            .remove()
+
           // Reset the draggable to its original position
-          this.resetDraggable($draggable);
-          
+          this.resetDraggable($draggable)
+
           // Update the user answer storage
-          this.storeUserAnswer();
-          
+          this.storeUserAnswer()
+
           // Update the answer count display
-          this.updateAnswerCount();
+          this.updateAnswerCount()
         }
       }
     },
 
-    updateAnswerCount: function() {
-      const _userAnswer = this.model.get('_userAnswer');
-      const _userAnswerNum = _userAnswer.filter((item) => item !== -1).length;
-      const questions = this.model.get('_items');
+    updateAnswerCount: function () {
+      const _userAnswer = this.model.get("_userAnswer")
+      const _userAnswerNum = _userAnswer.filter((item) => item !== -1).length
+      const questions = this.model.get("_items")
       const questionsAnsweredNum = questions.reduce((acc, item) => {
-        const acceptedAnswers = item.accepted.length || 0;
-        acc = acc + acceptedAnswers;
-        return acc;
-      }, 0);
-      this.renderCurrentAnswers(_userAnswerNum, questionsAnsweredNum);
-    }
-  });
+        const acceptedAnswers = item.accepted.length || 0
+        acc = acc + acceptedAnswers
+        return acc
+      }, 0)
+      this.renderCurrentAnswers(_userAnswerNum, questionsAnsweredNum)
+    },
+  })
 
   // Adapt.register("dragndropwithimage", dragndropwithimage);
 
-  return DragndropwithimageView;
-});
+  return DragndropwithimageView
+})
